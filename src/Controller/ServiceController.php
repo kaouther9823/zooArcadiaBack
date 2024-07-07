@@ -14,7 +14,7 @@ use App\Entity\Service;
 use App\Repository\ServiceRepository;
 
 
- #[Route("/api/services")]
+#[Route("/api/services")]
 class ServiceController extends AbstractController
 {
     private $serviceRepository;
@@ -24,14 +24,17 @@ class ServiceController extends AbstractController
         $this->serviceRepository = $serviceRepository;
     }
 
-     #[Route("/", name: "service_index", methods: ["GET"])]
+    #[Route("/", name: "service_index", methods: ["GET"])]
     public function index(): JsonResponse
     {
         $services = $this->serviceRepository->findAll();
+        //$query = $entityManager->createQuery('SELECT u FROM App\Entity\User u');
+        //$query->useResultCache(true, 3600, 'user_by_email_cache');
+        //$services = $query->getResult();
         return $this->json($services);
     }
-    
-     #[Route("/{id}", name: "service_show", methods: ["GET"])]
+
+    #[Route("/{id}", name: "service_show", methods: ["GET"])]
     public function show($id): JsonResponse
     {
         $service = $this->serviceRepository->find($id);
@@ -40,8 +43,8 @@ class ServiceController extends AbstractController
         }
         return $this->json($service);
     }
-    
-     #[Route("/", name: "service_create", methods: ["POST"])]
+
+    #[Route("/", name: "service_create", methods: ["POST"])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -53,11 +56,11 @@ class ServiceController extends AbstractController
         return $this->json($service);
     }
 
-     #[Route("/{id}", name: "service_update", methods: ["PUT"])]
+    #[Route("/{id}", name: "service_update", methods: ["PUT"])]
     public function update($id, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $service = $entityManager->getRepository(Service::class)->find($id);
+        $service = $this->serviceRepository->find($id);
         if (!$service) {
             throw $this->createNotFoundException('Service not found');
         }
@@ -67,10 +70,10 @@ class ServiceController extends AbstractController
         return $this->json($service);
     }
 
-     #[Route("/{id}", name: "service_delete", methods: ["DELETE"])]
+    #[Route("/{id}", name: "service_delete", methods: ["DELETE"])]
     public function delete($id, EntityManagerInterface $entityManager): JsonResponse
     {
-        $service = $entityManager->getRepository(Service::class)->find($id);
+        $service = $this->serviceRepository->find($id);
         if (!$service) {
             throw $this->createNotFoundException('Service not found');
         }

@@ -15,7 +15,6 @@ class Service
     #[ORM\Column(type: "integer")]
     private $serviceId;
 
-
     #[ORM\Column(type: "string", length: 50)]
     private $nom;
 
@@ -36,7 +35,6 @@ class Service
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -48,7 +46,6 @@ class Service
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 }

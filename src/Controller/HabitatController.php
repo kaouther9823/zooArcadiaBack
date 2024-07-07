@@ -52,7 +52,6 @@ class HabitatController extends AbstractController
         $habitat = new Habitat();
         $habitat->setNom($data['nom']);
         $habitat->setDescription($data['description']);
-        $habitat->setCommentaireHabitat($data['commentaire_habitat']);
         $this->entityManager->persist($habitat);
         $this->entityManager->flush();
         return $this->json($habitat);

@@ -3,6 +3,10 @@
 // src/Controller/ImageController.php
 namespace App\Controller;
 
+use App\Entity\HabitatImage;
+use App\Repository\HabitatRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use http\Client\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,16 +15,45 @@ use App\Entity\Image;
 use App\Repository\ImageRepository;
 
 
- #[Route("/images")]
+ #[Route("/api/images")]
  
 class ImageController extends AbstractController
 {
     private $imageRepository;
+    private $entityManager;
+    private $habitatRepository;
 
-    public function __construct(ImageRepository $imageRepository)
+    public function __construct(ImageRepository $imageRepository,
+                                HabitatRepository $habitatRepository,
+                                EntityManagerInterface $entityManager)
     {
         $this->imageRepository = $imageRepository;
+        $this->entityManager = $entityManager;
+        $this->habitatRepository = $habitatRepository;
     }
+
+     #[Route("/upload/habitat/{id}", name: "images_habitat_upload", methods: ("POST"))]
+     public function upload(Request $request, int $id): JsonResponse
+     {
+         $files = $request->files->get('add-images');
+
+         foreach ($files as $file) {
+             $image = new Image();
+             $image->setImageData(file_get_contents($file->getPathname()));
+
+             $habitatImage = new HabitatImage();
+             $habitatImage->setHabitat($this->habitatRepository->find($id));
+             $habitatImage->setImage($image);
+
+             $this->entityManager->persist($image);
+             $this->entityManager->persist($habitatImage);
+         }
+
+         $this->entityManager->flush();
+
+         return $this->json(['status' => 'success']);
+     }
+
 
     
      #[Route("/", name: "image_index", methods: ["GET"])]

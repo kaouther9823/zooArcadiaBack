@@ -24,10 +24,6 @@ class Habitat
     #[Groups(['avis_veterinaire:read'])]
     private $description;
 
-    #[ORM\Column(type: "string", length: 50, nullable: true)]
-    #[Groups(['avis_veterinaire:read'])]
-    private $commentaireHabitat;
-
     public function getHabitatId(): ?int
     {
         return $this->habitatId;
@@ -55,14 +51,4 @@ class Habitat
         return $this;
     }
 
-    public function getCommentaireHabitat(): ?string
-    {
-        return $this->commentaireHabitat;
-    }
-
-    public function setCommentaireHabitat(?string $commentaireHabitat): static
-    {
-        $this->commentaireHabitat = $commentaireHabitat;
-        return $this;
-    }
 }
