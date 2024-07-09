@@ -10,6 +10,7 @@ use http\Client\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response as ResponseFoundation;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Image;
 use App\Repository\ImageRepository;
@@ -31,9 +32,37 @@ class ImageController extends AbstractController
         $this->entityManager = $entityManager;
         $this->habitatRepository = $habitatRepository;
     }
+     #[Route("/upload", name: "upload_image", methods: ("POST"))]
+     public function uploadImage(Request $request): ResponseFoundation
+     {
+         $file = $request->files->get('image');
+         $imageName = $request->request->get('imageName');
+
+         if (!$file) {
+             return new ResponseFoundation('No file uploaded', ResponseFoundation::HTTP_BAD_REQUEST);
+         }
+         if (!$imageName) {
+             return new ResponseFoundation('No image name provided', ResponseFoundation::HTTP_BAD_REQUEST);
+         }
+         // Move the uploaded file to a directory (e.g., public/uploads/)
+         //$uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/';
+         $uploadsDirectory = "C:\\Users\\sh6210\\formation\\ZooArcadiaWeb\\images\\services\\";
+         //$fileName = $imageName . '.' . $file->guessExtension();
+
+         try {
+             $file->move($uploadsDirectory, $imageName);
+         } catch (\Exception $e) {
+             return new ResponseFoundation('Failed to move file', ResponseFoundation::HTTP_INTERNAL_SERVER_ERROR);
+         }
+
+         return $this->json([
+             'message' => 'File uploaded successfully',
+             'filename' => $imageName,
+         ]);
+     }
 
      #[Route("/upload/habitat/{id}", name: "images_habitat_upload", methods: ("POST"))]
-     public function upload(Request $request, int $id): JsonResponse
+     public function uploadImageForHabitat(Request $request, int $id): JsonResponse
      {
          $files = $request->files->get('add-images');
 
@@ -54,8 +83,6 @@ class ImageController extends AbstractController
          return $this->json(['status' => 'success']);
      }
 
-
-    
      #[Route("/", name: "image_index", methods: ["GET"])]
      
     public function index(): JsonResponse
