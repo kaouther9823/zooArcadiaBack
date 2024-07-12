@@ -1,42 +1,65 @@
 <?php
 
-// src/Entity/HabitatImage.php
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+
 
 #[ORM\Entity(repositoryClass: "App\Repository\HabitatImageRepository")]
 class HabitatImage
 {
-    #[ORM\Id()]
-    #[ORM\ManyToOne(targetEntity: "Habitat")]
-    #[ORM\JoinColumn(name: "habitat_id", referencedColumnName: "habitat_id")]
-    private $habitat;
 
     #[ORM\Id()]
-    #[ORM\ManyToOne(targetEntity: "Image")]
-    #[ORM\JoinColumn(name: "image_id", referencedColumnName: "image_id")]
-    private $image;
+    #[ORM\GeneratedValue()]
+    #[ORM\Column(type: "integer")]
+    #[Groups(['habitat:read'])]
+    private $imageId;
+
+    #[ORM\Column(type: "blob")]
+    #[Groups(['habitat:read'])]
+    private $imageData;
+
+    #[ORM\ManyToOne(inversedBy: 'images')]
+    #[ORM\JoinColumn(name: "habitat_id", referencedColumnName: "habitat_id", nullable: false)]
+    private ?Habitat $habitat = null;
+
+    public function getImageId(): ?int
+    {
+        return $this->imageId;
+    }
+
+    public function setImageData($imageData): static
+    {
+        $this->imageData = $imageData;
+        return $this;
+    }
 
     public function getHabitat(): ?Habitat
     {
         return $this->habitat;
     }
 
-    public function setHabitat(?Habitat $habitat): static
+    public function setHabitat($habitat): static
     {
         $this->habitat = $habitat;
+
         return $this;
     }
 
-    public function getImage(): ?Image
+    public function getImageData()
     {
-        return $this->image;
+        if (is_resource($this->imageData)) {
+            $data = stream_get_contents($this->imageData);
+        } else {
+            $data = $this->imageData;
+        }
+        return $data;
     }
 
-    public function setImage(?Image $image): static
+    public function getBase64Data(): ?string
     {
-        $this->image = $image;
-        return $this;
+        $data = $this->getImageData();
+        return $data !== null ? base64_encode($data) : null;
     }
 }

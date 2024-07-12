@@ -2,25 +2,28 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use App\Repository\EtatRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
 
-#[ORM\Entity(repositoryClass: "App\Repository\RaceRepository")]
-class Race
+#[ORM\Entity(repositoryClass: EtatRepository::class)]
+//#[ApiResource]
+class Etat
 {
     #[ORM\Id()]
-    #[ORM\GeneratedValue()]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Groups(['animal:read'])]
-    private $raceId;
+    #[Groups(['animal:read', 'etat:read'])]
+    private int $etatId;
 
-    #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['animal:read'])]
+    #[ORM\Column(length: 50)]
+    #[Groups(['animal:read','etat:read'])]
     private $label;
 
-    public function getRaceId(): ?int
+    public function getEtatId(): ?int
     {
-        return $this->raceId;
+        return $this->etatId;
     }
 
     public function getLabel(): ?string

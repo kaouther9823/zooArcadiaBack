@@ -4,33 +4,56 @@
 namespace App\Entity;
 
 use App\Repository\AnimalRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 #[ORM\Entity(repositoryClass: AnimalRepository::class)]
 class Animal
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $animalId;
+    #[ORM\Column("animal_id", type: 'integer')]
+    #[Groups(['habitat:read', 'animal:read'])]
+    private $id;
 
     #[ORM\Column(type: 'string', length: 50)]
+    #[Groups(['habitat:read', 'animal:read'])]
     private $prenom;
 
-    #[ORM\Column(type: 'string', length: 100)]
+    #[ORM\ManyToOne(targetEntity: "Etat")]
+    #[ORM\JoinColumn(name: "etat_id", referencedColumnName: "etat_id")]
+    #[Groups(['habitat:read', 'animal:read'])]
     private $etat;
 
     #[ORM\ManyToOne(targetEntity: 'Habitat')]
     #[ORM\JoinColumn(name: "habitat_id", referencedColumnName: "habitat_id")]
-    private $habitat;
+    #[Groups(['animal:read'])]
+    #[MaxDepth(1)]
+    private ?Habitat $habitat = null;
 
     #[ORM\ManyToOne(targetEntity: "Race")]
     #[ORM\JoinColumn(name: "race_id", referencedColumnName: "race_id")]
+    #[Groups(['habitat:read', 'animal:read'])]
     private $race;
 
-    public function getAnimalId(): ?int
+    /**
+     * @var Collection<int, HabitatImage>
+     */
+    #[ORM\OneToMany(targetEntity: AnimalImage::class, mappedBy: 'animal', cascade: ['persist', 'remove'],  orphanRemoval: true)]
+    #[Groups(['habitat:read'])]
+    private Collection $images;
+
+    public function __construct()
     {
-        return $this->animalId;
+        $this->images = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     public function getPrenom(): ?string
@@ -45,12 +68,12 @@ class Animal
         return $this;
     }
 
-    public function getEtat(): ?string
+    public function getEtat(): ?Etat
     {
         return $this->etat;
     }
 
-    public function setEtat(string $etat): static
+    public function setEtat(Etat $etat): static
     {
         $this->etat = $etat;
 
@@ -77,6 +100,36 @@ class Animal
     public function setRace(?Race $race): static
     {
         $this->race = $race;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AnimalImage>
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(AnimalImage $image): static
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setHabitat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(AnimalImage $image): static
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getHabitat() === $this) {
+                $image->setHabitat(null);
+            }
+        }
 
         return $this;
     }

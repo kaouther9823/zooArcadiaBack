@@ -16,6 +16,19 @@ class AnimalRepository extends ServiceEntityRepository
         parent::__construct($registry, Animal::class);
     }
 
+    /**
+     * @return Animal[] Returns an array of Animal objects
+     */
+    public function findByExampleField($value): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.habitat.id = :val')
+            ->setParameter('val', $value)
+            ->orderBy('a.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Animal[] Returns an array of Animal objects
 //     */

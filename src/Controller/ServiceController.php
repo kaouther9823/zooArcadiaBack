@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route("/api/services")]
@@ -80,4 +81,33 @@ class ServiceController extends AbstractController
         $this->entityManager->flush();
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
+
+    #[Route("/upload", name: "upload_image", methods: ("POST"))]
+    public function uploadImage(Request $request): Response
+    {
+        $file = $request->files->get('image');
+        $imageName = $request->request->get('imageName');
+        if (!$file) {
+            return new Response('No file uploaded', Response::HTTP_BAD_REQUEST);
+        }
+        if (!$imageName) {
+            return new Response('No image name provided', Response::HTTP_BAD_REQUEST);
+        }
+        // Move the uploaded file to a directory (e.g., public/uploads/)
+        //$uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/';
+        $uploadsDirectory = "C:\\Users\\sh6210\\formation\\ZooArcadiaWeb\\images\\services\\";
+        //$fileName = $imageName . '.' . $file->guessExtension();
+
+        try {
+            $file->move($uploadsDirectory, $imageName);
+        } catch (\Exception $e) {
+            return new Response('Failed to move file', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $this->json([
+            'message' => 'File uploaded successfully',
+            'filename' => $imageName,
+        ]);
+    }
+
 }

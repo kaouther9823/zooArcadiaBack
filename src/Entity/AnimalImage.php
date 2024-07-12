@@ -2,20 +2,34 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: "App\Repository\AnimalImageRepository")]
 class AnimalImage
 {
     #[ORM\Id()]
-    #[ORM\ManyToOne(targetEntity: "Animal")]
-    #[ORM\JoinColumn(name: "animal_id", referencedColumnName: "animal_id")]
-    private $animal;
+    #[ORM\GeneratedValue()]
+    #[ORM\Column(type: "integer")]
+    private $imageId;
 
-    #[ORM\Id()]
-    #[ORM\ManyToOne(targetEntity: "Image")]
-    #[ORM\JoinColumn(name: "image_id", referencedColumnName: "image_id")]
-    private $image;
+    #[ORM\Column(type: "blob")]
+    private $imageData;
+
+    #[ORM\ManyToOne(targetEntity: Animal::class, inversedBy: 'images')]
+    #[ORM\JoinColumn(name: "animal_id", referencedColumnName: "animal_id", nullable: false)]
+    private ?Animal $animal = null;
+
+    public function getImageId(): ?int
+    {
+        return $this->imageId;
+    }
+
+    public function setImageData($imageData): static
+    {
+        $this->imageData = $imageData;
+        return $this;
+    }
 
     public function getAnimal(): ?Animal
     {
@@ -25,18 +39,23 @@ class AnimalImage
     public function setAnimal(?Animal $animal): static
     {
         $this->animal = $animal;
+
         return $this;
     }
 
-    public function getImage(): ?Image
+    public function getImageData()
     {
-        return $this->image;
+        if (is_resource($this->imageData)) {
+            $data = stream_get_contents($this->imageData);
+        } else {
+            $data = $this->imageData;
+        }
+        return $data;
     }
 
-    public function setImage(?Image $image): static
+    public function getBase64Data(): ?string
     {
-        $this->image = $image;
-
-        return $this;
+        $data = $this->getImageData();
+        return $data !== null ? base64_encode($data) : null;
     }
 }
