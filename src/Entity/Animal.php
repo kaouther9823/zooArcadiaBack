@@ -16,11 +16,11 @@ class Animal
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column("animal_id", type: 'integer')]
-    #[Groups(['habitat:read', 'animal:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 50)]
-    #[Groups(['habitat:read', 'animal:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read'])]
     private $prenom;
 
     #[ORM\ManyToOne(targetEntity: "Etat")]
@@ -32,11 +32,11 @@ class Animal
     #[ORM\JoinColumn(name: "habitat_id", referencedColumnName: "habitat_id")]
     #[Groups(['animal:read'])]
     #[MaxDepth(1)]
-    private ?Habitat $habitat = null;
+    private Habitat $habitat;
 
     #[ORM\ManyToOne(targetEntity: "Race")]
     #[ORM\JoinColumn(name: "race_id", referencedColumnName: "race_id")]
-    #[Groups(['habitat:read', 'animal:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read'])]
     private $race;
 
     /**
@@ -80,12 +80,12 @@ class Animal
         return $this;
     }
 
-    public function getHabitat(): ?Habitat
+    public function getHabitat(): Habitat
     {
         return $this->habitat;
     }
 
-    public function setHabitat(?Habitat $habitat): static
+    public function setHabitat(Habitat $habitat): static
     {
         $this->habitat = $habitat;
 

@@ -9,10 +9,12 @@ use App\Repository\AnimalRepository;
 use App\Repository\EtatRepository;
 use App\Repository\NouritureRepository;
 use App\Repository\UtilisateurRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\RapportVeterinaire;
 use App\Repository\RapportVeterinaireRepository;
@@ -51,9 +53,9 @@ class RapportVeterinaireController extends AbstractController
     {
         $rapports = $this->rapportVeterinaireRepository->findAll();
 
-        $data = $this->serializer->normalize($rapports, null, ['groups' => 'rapport_veterinaire:read']);
+        $data = $this->serializer->normalize($rapports, null, ['groups' => ['rapport_veterinaire:read']]);
 
-        return new JsonResponse($data, JsonResponse::HTTP_OK);
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
      #[Route("/{id}", name: "rapport_veterinaire_show", methods: ["GET"])]
@@ -66,9 +68,9 @@ class RapportVeterinaireController extends AbstractController
             throw $this->createNotFoundException('Rapport not found');
         }
 
-        $data = $this->serializer->normalize($rapport, null, ['groups' => 'rapport_veterinaire:read']);
+        $data = $this->serializer->normalize($rapport, null, ['groups' => ['rapport_veterinaire:read']]);
 
-        return new JsonResponse($data,JsonResponse::HTTP_OK);
+        return new JsonResponse($data, Response::HTTP_OK);
     }
     
      #[Route("/", name: "rapport_veterinaire_create", methods: ["POST"])]
@@ -84,15 +86,15 @@ class RapportVeterinaireController extends AbstractController
         $rapport->setEtat($this->etatRepository->find($data['etat']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
         $rapport->setQuantite($data['quantite']);
-        $rapport->setDate(new \DateTime());
+        $rapport->setDate(new DateTime());
         $rapport->setDetail($data['description']);
 
         $this->entityManager->persist($rapport);
         $this->entityManager->flush();
 
-        $data = $this->serializer->normalize($rapport, null, ['groups' => 'rapport_veterinaire:read']);
+        $data = $this->serializer->normalize($rapport, null, ['groups' => ['rapport_veterinaire:read']]);
 
-        return new JsonResponse($data, JsonResponse::HTTP_OK);
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
     
@@ -110,14 +112,14 @@ class RapportVeterinaireController extends AbstractController
 
         $rapport->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
         $rapport->setAnimal($this->animalRepository->find($data['animal_id']));
-        $rapport->setDate(new \DateTime($data['date']));
+        $rapport->setDate(new DateTime());
         $rapport->setDetail($data['detail']);
 
         $this->entityManager->flush();
 
-        $data = $this->serializer->serialize($rapport, 'json', ['groups' => 'rapport_veterinaire:read']);
+        $data = $this->serializer->serialize($rapport, 'json', ['groups' => ['rapport_veterinaire:read']]);
 
-        return new JsonResponse($data, JsonResponse::HTTP_OK);
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 
     
@@ -134,6 +136,6 @@ class RapportVeterinaireController extends AbstractController
         $this->entityManager->remove($rapport);
         $this->entityManager->flush();
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

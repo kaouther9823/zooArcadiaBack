@@ -11,6 +11,7 @@ use App\Repository\EtatRepository;
 use App\Repository\HabitatRepository;
 use App\Repository\RaceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -57,7 +58,7 @@ private $animalImageRepository;
         $animals = $this->animalRepository->findAll();
         $animalData = $this->serializer->normalize($animals, null, ['groups' => ['animal:read']]);
 
-        return new JsonResponse($animalData, JsonResponse::HTTP_OK);
+        return new JsonResponse($animalData, Response::HTTP_OK);
     }
 
     #[Route("/habitat/{id}", name: "animal_index_by_habitat", methods: ["GET"])]
@@ -77,7 +78,7 @@ private $animalImageRepository;
 
         $animalData = $this->serializer->normalize($animals, null, ['groups' => ['animal:read']]);
 
-        return new JsonResponse($animalData, JsonResponse::HTTP_OK);
+        return new JsonResponse($animalData, Response::HTTP_OK);
     }
 
 
@@ -90,7 +91,7 @@ private $animalImageRepository;
         }
         $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
 
-        return new JsonResponse($animalData, JsonResponse::HTTP_OK);
+        return new JsonResponse($animalData, Response::HTTP_OK);
     }
 
     #[Route("/", name: "animal_create", methods: ["POST"])]
@@ -108,7 +109,7 @@ private $animalImageRepository;
 
         $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
 
-        return new JsonResponse($animalData, JsonResponse::HTTP_OK);
+        return new JsonResponse($animalData, Response::HTTP_OK);
     }
 
     #[Route("/{id}", name: "animal_update", methods: ["PUT"])]
@@ -128,7 +129,7 @@ private $animalImageRepository;
         $this->entityManager->flush();
         $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
 
-        return new JsonResponse($animalData, JsonResponse::HTTP_OK);
+        return new JsonResponse($animalData, Response::HTTP_OK);
     }
 
 
@@ -142,7 +143,7 @@ private $animalImageRepository;
         }
         $this->entityManager->remove($animal);
         $this->entityManager->flush();
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route("/{id}/images", name: "animal_list_image", methods: ["GET"])]
@@ -173,11 +174,11 @@ private $animalImageRepository;
             return mb_check_encoding($data, 'UTF-8') ? $data : mb_convert_encoding($data, 'UTF-8', 'ISO-8859-1');
         } elseif (is_array($data)) {
             foreach ($data as $key => $value) {
-                $data[$key] = sanitize_utf8($value);
+                $data[$key] = $this->sanitize_utf8($value);
             }
         } elseif (is_object($data)) {
             foreach ($data as $key => $value) {
-                $data->$key = sanitize_utf8($value);
+                $data->$key = $this->sanitize_utf8($value);
             }
         }
         return $data;
@@ -231,7 +232,7 @@ private $animalImageRepository;
                     $animalImage->setAnimal($animal);
                     $animalImage->setImageData($imageData);
                     $this->entityManager->persist($animalImage);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->logger->error('Failed to process file', ['exception' => $e->getMessage()]);
                     return new JsonResponse('Failed to process file', Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
@@ -260,6 +261,6 @@ private $animalImageRepository;
         $this->entityManager->remove($image);
         $this->entityManager->flush();
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

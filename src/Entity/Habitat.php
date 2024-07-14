@@ -15,15 +15,15 @@ class Habitat
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column("habitat_id", type: "integer")]
-    #[Groups(['habitat:read', 'habitat_image:read','avis_veterinaire:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'habitat_image:read','avis_veterinaire:read'])]
     private $id;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['habitat:read','avis_veterinaire:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'avis_veterinaire:read'])]
     private $nom;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['habitat:read','avis_veterinaire:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'avis_veterinaire:read'])]
     private $description;
 
     /**

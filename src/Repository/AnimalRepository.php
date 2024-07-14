@@ -19,11 +19,11 @@ class AnimalRepository extends ServiceEntityRepository
     /**
      * @return Animal[] Returns an array of Animal objects
      */
-    public function findByExampleField($value): array
+    public function findByHabitat($idHabitat): array
     {
         return $this->createQueryBuilder('a')
-            ->andWhere('a.habitat.id = :val')
-            ->setParameter('val', $value)
+            ->andWhere('a.habitat = :idHabitat')
+            ->setParameter('idHabitat', $idHabitat)
             ->orderBy('a.id', 'ASC')
             ->getQuery()
             ->getResult();

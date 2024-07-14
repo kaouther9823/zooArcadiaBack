@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 #[ORM\Entity(repositoryClass: "App\Repository\RapportVeterinaireRepository")]
 class RapportVeterinaire
@@ -12,34 +13,40 @@ class RapportVeterinaire
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column("rapport_veterinaire_id", type: "integer")]
+    #[Groups(['rapport_veterinaire:read'])]
     private $id;
+
     #[ORM\Column(type: "date")]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
     private $date;
+
     #[ORM\ManyToOne(targetEntity: "Nouriture")]
     #[ORM\JoinColumn(name: "nouriture_id", referencedColumnName: "nouriture_id")]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
     private $nouriture;
+
     #[ORM\Column(type: "integer")]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
     private $quantite;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
     private $detail;
 
     #[ORM\ManyToOne(targetEntity: "Utilisateur")]
     #[ORM\JoinColumn(name: "veterinaire_id", referencedColumnName: "user_id")]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
     private $veterinaire;
 
     #[ORM\ManyToOne(targetEntity: "Etat")]
     #[ORM\JoinColumn(name: "etat_id", referencedColumnName: "etat_id")]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
     private $etat;
+
     #[ORM\ManyToOne(targetEntity: "Animal")]
     #[ORM\JoinColumn(name: "animal_id", referencedColumnName: "animal_id")]
-    #[Groups(['rapport_veterinaire'])]
+    #[Groups(['rapport_veterinaire:read'])]
+    #[MaxDepth(1)]
     private $animal;
 
     public function getId(): ?int
@@ -69,12 +76,12 @@ class RapportVeterinaire
         return $this;
     }
 
-    public function getAnimal(): ?Animal
+    public function getAnimal(): Animal
     {
         return $this->animal;
     }
 
-    public function setAnimal(?Animal $animal): static
+    public function setAnimal(Animal $animal): static
     {
         $this->animal = $animal;
         return $this;
@@ -96,7 +103,7 @@ class RapportVeterinaire
         return $this->etat;
     }
 
-    public function setEtat(?Etat $etat): static
+    public function setEtat(Etat $etat): static
     {
         $this->etat = $etat;
 
@@ -120,7 +127,7 @@ class RapportVeterinaire
         return $this->nouriture;
     }
 
-    public function setNouriture(?Nouriture $nouriture): static
+    public function setNouriture(Nouriture $nouriture): static
     {
         $this->nouriture = $nouriture;
 

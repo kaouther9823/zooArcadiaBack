@@ -13,11 +13,11 @@ class Utilisateur implements UserInterface
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column(type: "integer")]
-    #[Groups(['avis_veterinaire:read'])]
+    #[Groups(['avis_veterinaire:read', 'rapport_veterinaire:read'])]
     private $userId;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['avis_veterinaire:read'])]
+    #[Groups(['avis_veterinaire:read', 'rapport_veterinaire:read'])]
     private $username;
 
     #[ORM\Column(type: "string", length: 50)]
@@ -25,11 +25,11 @@ class Utilisateur implements UserInterface
     private $password;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['avis_veterinaire:read'])]
+    #[Groups(['avis_veterinaire:read', 'rapport_veterinaire:read'])]
     private $nom;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['avis_veterinaire:read'])]
+    #[Groups(['avis_veterinaire:read', 'rapport_veterinaire:read'])]
     private $prenom;
 
     #[ORM\ManyToOne(targetEntity: "Role")]

@@ -12,9 +12,11 @@ class Nouriture
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column("nouriture_id", type: "integer")]
+    #[Groups(['rapport_veterinaire:read'])]
     private ?int $id;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['rapport_veterinaire:read'])]
     private ?string $label;
 
     #[ORM\Column(length: 100, nullable: true)]

@@ -14,11 +14,11 @@ class Etat
     #[ORM\Id()]
     #[ORM\GeneratedValue]
     #[ORM\Column("etat_id",type: "integer")]
-    #[Groups(['animal:read', 'etat:read'])]
+    #[Groups(['animal:read', 'rapport_veterinaire:read', 'etat:read'])]
     private int $id;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['animal:read','etat:read'])]
+    #[Groups(['animal:read', 'rapport_veterinaire:read', 'etat:read'])]
     private $label;
 
     public function getId(): ?int
