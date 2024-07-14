@@ -5,23 +5,43 @@ declare(strict_types=1);
 // src/Controller/RapportVeterinaireController.php
 namespace App\Controller;
 
+use App\Repository\AnimalRepository;
+use App\Repository\EtatRepository;
+use App\Repository\NouritureRepository;
+use App\Repository\UtilisateurRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\RapportVeterinaire;
 use App\Repository\RapportVeterinaireRepository;
+use Symfony\Component\Serializer\SerializerInterface;
 
 
- #[Route("/rapports/veterinaires")]
+#[Route("/api/rapports/veterinaires")]
  
 class RapportVeterinaireController extends AbstractController
 {
     private $rapportVeterinaireRepository;
+    private $animalRepository;
+    private $etatRepository;
+    private $utilisateurRepository;
+    private $nouritureRepository;
+    private $entityManager;
+    private $serializer;
 
-    public function __construct(RapportVeterinaireRepository $rapportVeterinaireRepository)
+    public function __construct(RapportVeterinaireRepository $rapportVeterinaireRepository, UtilisateurRepository $utilisateurRepository,
+                                EtatRepository $etatRepository, AnimalRepository $animalRepository, NouritureRepository $nouritureRepository,
+                                EntityManagerInterface $entityManager, SerializerInterface $serializer)
     {
         $this->rapportVeterinaireRepository = $rapportVeterinaireRepository;
+        $this->entityManager = $entityManager;
+        $this->etatRepository = $etatRepository;
+        $this->utilisateurRepository = $utilisateurRepository;
+        $this->animalRepository = $animalRepository;
+        $this->serializer = $serializer;
+        $this->nouritureRepository = $nouritureRepository;
     }
 
     
@@ -31,10 +51,11 @@ class RapportVeterinaireController extends AbstractController
     {
         $rapports = $this->rapportVeterinaireRepository->findAll();
 
-        return $this->json($rapports);
+        $data = $this->serializer->normalize($rapports, null, ['groups' => 'rapport_veterinaire:read']);
+
+        return new JsonResponse($data, JsonResponse::HTTP_OK);
     }
 
-    
      #[Route("/{id}", name: "rapport_veterinaire_show", methods: ["GET"])]
      
     public function show($id): JsonResponse
@@ -45,9 +66,10 @@ class RapportVeterinaireController extends AbstractController
             throw $this->createNotFoundException('Rapport not found');
         }
 
-        return $this->json($rapport);
-    }
+        $data = $this->serializer->normalize($rapport, null, ['groups' => 'rapport_veterinaire:read']);
 
+        return new JsonResponse($data,JsonResponse::HTTP_OK);
+    }
     
      #[Route("/", name: "rapport_veterinaire_create", methods: ["POST"])]
      
@@ -56,16 +78,21 @@ class RapportVeterinaireController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $rapport = new RapportVeterinaire();
-        $rapport->setVeterinaire($this->getDoctrine()->getRepository(Utilisateur::class)->find($data['veterinaire_id']));
-        $rapport->setAnimal($this->getDoctrine()->getRepository(Animal::class)->find($data['animal_id']));
-        $rapport->setDate(new \DateTime($data['date']));
-        $rapport->setDetail($data['detail']);
+       // $rapport->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
+        $rapport->setVeterinaire($this->utilisateurRepository->find(2));
+        $rapport->setAnimal($this->animalRepository->find($data['animal']));
+        $rapport->setEtat($this->etatRepository->find($data['etat']));
+        $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
+        $rapport->setQuantite($data['quantite']);
+        $rapport->setDate(new \DateTime());
+        $rapport->setDetail($data['description']);
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($rapport);
-        $entityManager->flush();
+        $this->entityManager->persist($rapport);
+        $this->entityManager->flush();
 
-        return $this->json($rapport);
+        $data = $this->serializer->normalize($rapport, null, ['groups' => 'rapport_veterinaire:read']);
+
+        return new JsonResponse($data, JsonResponse::HTTP_OK);
     }
 
     
@@ -75,21 +102,22 @@ class RapportVeterinaireController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $rapport = $entityManager->getRepository(RapportVeterinaire::class)->find($id);
+        $rapport = $this->rapportVeterinaireRepository->find($id);
 
         if (!$rapport) {
             throw $this->createNotFoundException('Rapport not found');
         }
 
-        $rapport->setVeterinaire($this->getDoctrine()->getRepository(Utilisateur::class)->find($data['veterinaire_id']));
-        $rapport->setAnimal($this->getDoctrine()->getRepository(Animal::class)->find($data['animal_id']));
+        $rapport->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
+        $rapport->setAnimal($this->animalRepository->find($data['animal_id']));
         $rapport->setDate(new \DateTime($data['date']));
         $rapport->setDetail($data['detail']);
 
-        $entityManager->flush();
+        $this->entityManager->flush();
 
-        return $this->json($rapport);
+        $data = $this->serializer->serialize($rapport, 'json', ['groups' => 'rapport_veterinaire:read']);
+
+        return new JsonResponse($data, JsonResponse::HTTP_OK);
     }
 
     
@@ -97,15 +125,14 @@ class RapportVeterinaireController extends AbstractController
      
     public function delete($id): JsonResponse
     {
-        $entityManager = $this->getDoctrine()->getManager();
-        $rapport = $entityManager->getRepository(RapportVeterinaire::class)->find($id);
+        $rapport = $this->entityManager->getRepository(RapportVeterinaire::class)->find($id);
 
         if (!$rapport) {
             throw $this->createNotFoundException('Rapport not found');
         }
 
-        $entityManager->remove($rapport);
-        $entityManager->flush();
+        $this->entityManager->remove($rapport);
+        $this->entityManager->flush();
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }

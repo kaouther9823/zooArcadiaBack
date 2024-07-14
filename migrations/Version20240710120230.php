@@ -20,9 +20,10 @@ final class Version20240710120230 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE IF EXISTS image');
         $this->addSql('DROP TABLE IF EXISTS habitat_image');
         $this->addSql('DROP TABLE IF EXISTS animal_image');
+        $this->addSql('DROP TABLE IF EXISTS image');
+
 
         $this->addSql('CREATE TABLE animal_image (image_id INT AUTO_INCREMENT NOT NULL, animal_id INT NOT NULL, image_data LONGBLOB NOT NULL, PRIMARY KEY(image_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE habitat_image (image_id INT AUTO_INCREMENT NOT NULL, habitat_id INT NOT NULL, image_data LONGBLOB NOT NULL, PRIMARY KEY(image_id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');

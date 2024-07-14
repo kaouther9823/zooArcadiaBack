@@ -10,17 +10,17 @@ class Race
 {
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column("race_id", type: "integer")]
     #[Groups(['animal:read'])]
-    private $raceId;
+    private $id;
 
     #[ORM\Column(type: "string", length: 50)]
     #[Groups(['animal:read'])]
     private $label;
 
-    public function getRaceId(): ?int
+    public function getId(): ?int
     {
-        return $this->raceId;
+        return $this->id;
     }
 
     public function getLabel(): ?string

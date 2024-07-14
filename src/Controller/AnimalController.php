@@ -55,7 +55,9 @@ private $animalImageRepository;
     public function index(): JsonResponse
     {
         $animals = $this->animalRepository->findAll();
-        return $this->json($animals);
+        $animalData = $this->serializer->normalize($animals, null, ['groups' => ['animal:read']]);
+
+        return new JsonResponse($animalData, JsonResponse::HTTP_OK);
     }
 
     #[Route("/habitat/{id}", name: "animal_index_by_habitat", methods: ["GET"])]

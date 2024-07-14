@@ -4,14 +4,15 @@ namespace App\Entity;
 
 use App\Repository\NouritureRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: NouritureRepository::class)]
 class Nouriture
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $nouriture_id;
+    #[ORM\Id()]
+    #[ORM\GeneratedValue()]
+    #[ORM\Column("nouriture_id", type: "integer")]
+    private ?int $id;
 
     #[ORM\Column(length: 50)]
     private ?string $label;
@@ -24,14 +25,9 @@ class Nouriture
         return $this->id;
     }
 
-    public function getNouritureId(): ?int
+    public function setId(int $id): static
     {
-        return $this->nouriture_id;
-    }
-
-    public function setNouritureId(int $nouriture_id): static
-    {
-        $this->nouriture_id = $nouriture_id;
+        $this->id = $id;
 
         return $this;
     }

@@ -10,7 +10,7 @@ use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 
 
- #[Route("/utilisateurs")]
+ #[Route("/api/users")]
  
 class UtilisateurController extends AbstractController
 {

@@ -13,7 +13,7 @@ use App\Entity\AvisVisiteur;
 use App\Repository\AvisVisiteurRepository;
 
 
- #[Route("/avis-visiteur")]
+ #[Route("/api/avis-visiteur")]
  
 class AvisVisiteurController extends AbstractController
 {

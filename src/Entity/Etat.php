@@ -13,17 +13,17 @@ class Etat
 {
     #[ORM\Id()]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column("etat_id",type: "integer")]
     #[Groups(['animal:read', 'etat:read'])]
-    private int $etatId;
+    private int $id;
 
     #[ORM\Column(length: 50)]
     #[Groups(['animal:read','etat:read'])]
     private $label;
 
-    public function getEtatId(): ?int
+    public function getId(): ?int
     {
-        return $this->etatId;
+        return $this->id;
     }
 
     public function getLabel(): ?string

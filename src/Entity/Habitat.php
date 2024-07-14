@@ -40,6 +40,7 @@ class Habitat
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->animals = new ArrayCollection();
     }
 
     public function getId(): ?int

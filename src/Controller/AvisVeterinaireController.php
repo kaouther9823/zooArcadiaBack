@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\AvisVeterinaire;
-use App\Form\AvisVeterinaireType;
 use App\Repository\AvisVeterinaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/avis_veterinaire')]
+#[Route('/api/avis_veterinaire')]
 class AvisVeterinaireController extends AbstractController
 {
     private EntityManagerInterface $entityManager;

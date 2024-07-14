@@ -13,7 +13,7 @@ use App\Entity\Role;
 use App\Repository\RoleRepository;
 
 
- #[Route("/roles")]
+ #[Route("/api/roles")]
  
 class RoleController extends AbstractController
 {
