@@ -8,6 +8,8 @@
 /var/
 /vendor/
 .idea/
+.idea/php.xml
+/.idea/sonarlint
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###

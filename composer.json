@@ -7,7 +7,7 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "api-platform/core": "^3.3",
+        "api-platform/core": "*",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.12",
         "doctrine/doctrine-migrations-bundle": "^3.3",
@@ -17,6 +17,7 @@
         "phpstan/phpdoc-parser": "^1.29",
         "symfony/asset": "7.1.*",
         "symfony/asset-mapper": "7.1.*",
+        "symfony/cache": "7.1.*",
         "symfony/console": "7.1.*",
         "symfony/doctrine-messenger": "7.1.*",
         "symfony/dotenv": "7.1.*",
@@ -49,6 +50,7 @@
         "twig/twig": "^2.12|^3.0"
     },
     "config": {
+        "disable-tls": true,
         "allow-plugins": {
             "php-http/discovery": true,
             "symfony/flex": true,
