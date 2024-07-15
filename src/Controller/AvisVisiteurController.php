@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\AvisVisiteur;
 use App\Repository\AvisVisiteurRepository;
@@ -73,7 +74,7 @@ class AvisVisiteurController extends AbstractController
         $avis = new AvisVisiteur();
         $avis->setPseudo($data['pseudo']);
         $avis->setCommentaire($data['commentaire']);
-        $avis->setNote(5);
+        $avis->setNote($data['note']);
         $avis->setVisible(false);
         $avis->setTreated(false);
 
@@ -117,6 +118,6 @@ class AvisVisiteurController extends AbstractController
         $this->entityManager->remove($avis);
         $this->entityManager->flush();
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

@@ -13,11 +13,11 @@ class Role
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column(type: "integer")]
-    #[Groups(['avis_veterinaire:read'])]
+    #[Groups(['avis_veterinaire:read', 'utilisateur:read'])]
     private $roleId;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['avis_veterinaire:read'])]
+    #[Groups(['avis_veterinaire:read', 'utilisateur:read'])]
     private $label;
 
     public function getRoleId(): ?int

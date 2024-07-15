@@ -1,3 +1,6 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+        envelope:
+            sender: 'admin@trial-3vz9dlew1y1lkj50.mlsender.net'
+        message_bus: false
