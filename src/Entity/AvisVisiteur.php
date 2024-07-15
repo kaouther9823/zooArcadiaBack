@@ -23,8 +23,11 @@ class AvisVisiteur
     #[ORM\Column(type: "integer", length: 1)]
     private $note;
 
-    #[ORM\Column(type: "boolean")]
-    private $isVisible;
+    #[ORM\Column("is_visible", type: "boolean")]
+    private $visible;
+
+    #[ORM\Column("is_treated", type: "boolean")]
+    private $treated;
 
     public function getAvisId(): ?int
     {
@@ -55,12 +58,12 @@ class AvisVisiteur
 
     public function isVisible(): ?bool
     {
-        return $this->isVisible;
+        return $this->visible;
     }
 
-    public function setVisible(bool $isVisible): static
+    public function setVisible(bool $visible): static
     {
-        $this->isVisible = $isVisible;
+        $this->visible = $visible;
         return $this;
     }
 
@@ -74,4 +77,16 @@ class AvisVisiteur
         $this->note = $note;
         return $this;
     }
+
+    public function isTreated(): ?bool
+    {
+        return $this->treated;
+    }
+
+    public function setTreated(bool $treated): static
+    {
+        $this->treated = $treated;
+        return $this;
+    }
+
 }

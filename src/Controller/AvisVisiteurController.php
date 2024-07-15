@@ -5,23 +5,38 @@ declare(strict_types=1);
 // src/Controller/AvisVisiteurController.php
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\AvisVisiteur;
 use App\Repository\AvisVisiteurRepository;
+use Symfony\Component\Serializer\SerializerInterface;
 
 
- #[Route("/api/avis-visiteur")]
+#[Route("/api/avis")]
  
 class AvisVisiteurController extends AbstractController
 {
     private $avisVisiteurRepository;
+     private $entityManager;
 
-    public function __construct(AvisVisiteurRepository $avisVisiteurRepository)
+     private $serializer;
+     private $logger;
+
+
+     public function __construct(AvisVisiteurRepository $avisVisiteurRepository,
+                                 EntityManagerInterface $entityManager,
+                                 SerializerInterface $serializer,
+                                 LoggerInterface $logger)
     {
         $this->avisVisiteurRepository = $avisVisiteurRepository;
+        $this->entityManager = $entityManager;
+        $this->serializer = $serializer;
+        $this->logger = $logger;
+
     }
 
     
@@ -58,11 +73,12 @@ class AvisVisiteurController extends AbstractController
         $avis = new AvisVisiteur();
         $avis->setPseudo($data['pseudo']);
         $avis->setCommentaire($data['commentaire']);
-        $avis->setIsVisible($data['isVisible']);
+        $avis->setNote(5);
+        $avis->setVisible(false);
+        $avis->setTreated(false);
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($avis);
-        $entityManager->flush();
+        $this->entityManager->persist($avis);
+        $this->entityManager->flush();
 
         return $this->json($avis);
     }
@@ -74,18 +90,15 @@ class AvisVisiteurController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $avis = $entityManager->getRepository(AvisVisiteur::class)->find($id);
+        $avis = $this->avisVisiteurRepository->find($id);
 
         if (!$avis) {
             throw $this->createNotFoundException('Avis Visiteur not found');
         }
 
-        $avis->setPseudo($data['pseudo']);
-        $avis->setCommentaire($data['commentaire']);
-        $avis->setIsVisible($data['isVisible']);
+        $avis->setVisible($data['visible']);
 
-        $entityManager->flush();
+        $this->entityManager->flush();
 
         return $this->json($avis);
     }
@@ -95,15 +108,14 @@ class AvisVisiteurController extends AbstractController
      
     public function delete($id): JsonResponse
     {
-        $entityManager = $this->getDoctrine()->getManager();
-        $avis = $entityManager->getRepository(AvisVisiteur::class)->find($id);
+        $avis = $this->avisVisiteurRepository->find($id);
 
         if (!$avis) {
             throw $this->createNotFoundException('Avis Visiteur not found');
         }
 
-        $entityManager->remove($avis);
-        $entityManager->flush();
+        $this->entityManager->remove($avis);
+        $this->entityManager->flush();
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
