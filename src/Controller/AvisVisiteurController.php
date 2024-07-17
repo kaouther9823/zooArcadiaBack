@@ -45,10 +45,20 @@ class AvisVisiteurController extends AbstractController
      
     public function index(): JsonResponse
     {
-        $avis = $this->avisVisiteurRepository->findAll();
+        $avis = $this->avisVisiteurRepository->findAllOrdred();
 
         return $this->json($avis);
     }
+
+    #[Route("/home", name: "avis_visiteur_home", methods: ["GET"])]
+
+    public function showOnHomePage(): JsonResponse
+    {
+        $avis = $this->avisVisiteurRepository->findByVisible();
+
+        return $this->json($avis);
+    }
+
 
     
      #[Route("/{id}", name: "avis_visiteur_show", methods: ["GET"])]
@@ -98,6 +108,8 @@ class AvisVisiteurController extends AbstractController
         }
 
         $avis->setVisible($data['visible']);
+        $avis->setTreated($data['treated']);
+
 
         $this->entityManager->flush();
 
