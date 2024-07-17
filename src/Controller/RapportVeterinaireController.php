@@ -58,7 +58,29 @@ class RapportVeterinaireController extends AbstractController
         return new JsonResponse($data, Response::HTTP_OK);
     }
 
-     #[Route("/{id}", name: "rapport_veterinaire_show", methods: ["GET"])]
+
+    /**
+     * @throws \Exception
+     */
+    #[Route("/search", name: "rapport_veterinaire_search", methods: ["GET"])]
+
+    public function search(Request $request): JsonResponse
+    {
+        $animalName = $request->query->get('animal');
+        $startDate = $request->query->get('startDate') ? new DateTime($request->query->get('startDate')) : null;
+        $endDate = $request->query->get('endDate') ? new DateTime($request->query->get('endDate')) : null;
+
+        $rapports = $this->rapportVeterinaireRepository->findReportsByCriteria($animalName, $startDate, $endDate);
+
+        $data = $this->serializer->normalize($rapports, null, ['groups' => ['rapport_veterinaire:read']]);
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
+
+
+
+    #[Route("/{id}", name: "rapport_veterinaire_show", methods: ["GET"])]
      
     public function show($id): JsonResponse
     {

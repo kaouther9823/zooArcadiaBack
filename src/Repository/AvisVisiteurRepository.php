@@ -15,6 +15,27 @@ class AvisVisiteurRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, AvisVisiteur::class);
     }
+    public function findAllOrdred(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->orderBy('a.treated', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+
+    public function findByVisible(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.visible = :val')
+            ->setParameter('val', true)
+                ->orderBy('a.avisId', 'DESC')
+            ->setMaxResults(6)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
 //    /**
 //     * @return AvisVisiteur[] Returns an array of AvisVisiteur objects

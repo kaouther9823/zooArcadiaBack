@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\AvisVisiteur;
 use App\Repository\AvisVisiteurRepository;
@@ -44,10 +45,20 @@ class AvisVisiteurController extends AbstractController
      
     public function index(): JsonResponse
     {
-        $avis = $this->avisVisiteurRepository->findAll();
+        $avis = $this->avisVisiteurRepository->findAllOrdred();
 
         return $this->json($avis);
     }
+
+    #[Route("/home", name: "avis_visiteur_home", methods: ["GET"])]
+
+    public function showOnHomePage(): JsonResponse
+    {
+        $avis = $this->avisVisiteurRepository->findByVisible();
+
+        return $this->json($avis);
+    }
+
 
     
      #[Route("/{id}", name: "avis_visiteur_show", methods: ["GET"])]
@@ -73,7 +84,7 @@ class AvisVisiteurController extends AbstractController
         $avis = new AvisVisiteur();
         $avis->setPseudo($data['pseudo']);
         $avis->setCommentaire($data['commentaire']);
-        $avis->setNote(5);
+        $avis->setNote($data['note']);
         $avis->setVisible(false);
         $avis->setTreated(false);
 
@@ -97,6 +108,8 @@ class AvisVisiteurController extends AbstractController
         }
 
         $avis->setVisible($data['visible']);
+        $avis->setTreated($data['treated']);
+
 
         $this->entityManager->flush();
 
@@ -117,6 +130,6 @@ class AvisVisiteurController extends AbstractController
         $this->entityManager->remove($avis);
         $this->entityManager->flush();
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }
