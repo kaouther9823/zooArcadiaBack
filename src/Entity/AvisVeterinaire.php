@@ -30,6 +30,11 @@ class AvisVeterinaire
     #[Groups(['avis_veterinaire:read'])]
     private $habitat;
 
+
+    #[ORM\Column(type: "date")]
+    #[Groups(['avis_veterinaire:read'])]
+    private $date;
+
     public function getAvisId(): ?int
     {
         return $this->avisId;
@@ -69,4 +74,17 @@ class AvisVeterinaire
         $this->habitat = $habitat;
         return $this;
     }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): static
+    {
+        $this->date = $date;
+        return $this;
+    }
+
+
 }

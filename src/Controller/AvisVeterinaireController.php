@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/avis_veterinaire')]
+#[Route('/api/commentaires')]
 class AvisVeterinaireController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -46,15 +46,17 @@ class AvisVeterinaireController extends AbstractController
         return new JsonResponse($data, 200, [], true);
     }
 
-    #[Route('/new', name: 'avis_veterinaire_new', methods: ['POST'])]
+    #[Route('/', name: 'avis_veterinaire_new', methods: ['POST'])]
     public function new(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         $avisVeterinaire = new AvisVeterinaire();
         $avisVeterinaire->setCommentaire($data['commentaire']);
-        $avisVeterinaire->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
-        $avisVeterinaire->setHabitat($this->habitatRepository->find($data['habitat_id']));
+        //todo remplacer par getUser
+        $avisVeterinaire->setVeterinaire($this->utilisateurRepository->find(53));
+        $avisVeterinaire->setHabitat($this->habitatRepository->find($data['habitat']));
+        $avisVeterinaire->setDate(new \DateTime());
 
         $this->entityManager->persist($avisVeterinaire);
         $this->entityManager->flush();
@@ -66,20 +68,22 @@ class AvisVeterinaireController extends AbstractController
     public function show(int $id): JsonResponse
     {$avisVeterinaire = $this->avisVeterinaireRepository->find($id);
 
-        $data = $this->serializer->serialize($this->avisVeterinaire, 'json', ['groups' => 'avis_veterinaire:read']);
+        $data = $this->serializer->serialize($avisVeterinaire, 'json', ['groups' => 'avis_veterinaire:read']);
 
         return new JsonResponse($data, 200, [], true);
     }
 
-    #[Route('/{id}/edit', name: 'avis_veterinaire_edit', methods: ['PUT'])]
+    #[Route('/{id}', name: 'avis_veterinaire_edit', methods: ['PUT'])]
     public function edit(Request $request, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         $avisVeterinaire = $this->avisVeterinaireRepository->find($id);
-        $avisVeterinaire->setCommentaire($data['commentaire']);
-        $avisVeterinaire->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
-        $avisVeterinaire->setHabitat($this->habitatRepository->find($data['habitat_id']));
+
+        //todo remplacer par getUser
+        $avisVeterinaire->setVeterinaire($this->utilisateurRepository->find(53));
+        $avisVeterinaire->setHabitat($this->habitatRepository->find($data['habitat']));
+        $avisVeterinaire->setDate(new \DateTime());
 
         $this->entityManager->flush();
 

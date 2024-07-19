@@ -77,9 +77,6 @@ class RapportVeterinaireController extends AbstractController
         return new JsonResponse($data, Response::HTTP_OK);
     }
 
-
-
-
     #[Route("/{id}", name: "rapport_veterinaire_show", methods: ["GET"])]
      
     public function show($id): JsonResponse
@@ -103,15 +100,16 @@ class RapportVeterinaireController extends AbstractController
 
         $rapport = new RapportVeterinaire();
         $currentUser = $this->getUser();
-        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
-       // $rapport->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
-        $rapport->setVeterinaire($user);
+        //todo use getUser
+        //$user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $rapport->setVeterinaire($this->utilisateurRepository->find(53));
+        //$rapport->setVeterinaire($user);
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setEtat($this->etatRepository->find($data['etat']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
         $rapport->setQuantite($data['quantite']);
         $rapport->setDate(new DateTime());
-        $rapport->setDetail($data['description']);
+        $rapport->setDetail($data['commentaire']);
 
         $this->entityManager->persist($rapport);
         $this->entityManager->flush();
@@ -136,7 +134,7 @@ class RapportVeterinaireController extends AbstractController
 
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setDate(new DateTime());
-        $rapport->setDetail($data['description']);
+        $rapport->setDetail($data['commentaire']);
         $rapport->setEtat($this->etatRepository->find($data['etat']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
         $rapport->setQuantite($data['quantite']);
