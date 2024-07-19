@@ -102,8 +102,10 @@ class RapportVeterinaireController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $rapport = new RapportVeterinaire();
+        $currentUser = $this->getUser();
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
        // $rapport->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
-        $rapport->setVeterinaire($this->utilisateurRepository->find(2));
+        $rapport->setVeterinaire($user);
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setEtat($this->etatRepository->find($data['etat']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
@@ -132,10 +134,12 @@ class RapportVeterinaireController extends AbstractController
             throw $this->createNotFoundException('Rapport not found');
         }
 
-        $rapport->setVeterinaire($this->utilisateurRepository->find($data['veterinaire_id']));
-        $rapport->setAnimal($this->animalRepository->find($data['animal_id']));
+        $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setDate(new DateTime());
-        $rapport->setDetail($data['detail']);
+        $rapport->setDetail($data['description']);
+        $rapport->setEtat($this->etatRepository->find($data['etat']));
+        $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
+        $rapport->setQuantite($data['quantite']);
 
         $this->entityManager->flush();
 
