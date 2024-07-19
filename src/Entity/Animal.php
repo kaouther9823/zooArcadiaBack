@@ -36,7 +36,7 @@ class Animal
 
     #[ORM\ManyToOne(targetEntity: "Race")]
     #[ORM\JoinColumn(name: "race_id", referencedColumnName: "race_id")]
-    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read', 'rapport_employe:read'git ])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read', 'rapport_employe:read' ])]
     private $race;
 
     /**

@@ -144,4 +144,23 @@ class RapportEmployeController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
+    /**
+     * @throws \Exception
+     */
+    #[Route("/list/search", name: "rapport_employe_search", methods: ["GET"])]
+
+    public function search(Request $request): JsonResponse
+    {
+        $animalName = $request->query->get('animal');
+        $startDate = $request->query->get('startDate') ? new DateTime($request->query->get('startDate')) : null;
+        $endDate = $request->query->get('endDate') ? new DateTime($request->query->get('endDate')) : null;
+
+        $rapports = $this->rapportEmployeRepository->findReportsByCriteria($animalName, $startDate, $endDate);
+
+        $data = $this->serializer->normalize($rapports, null, ['groups' => ['rapport_employe:read']]);
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
 }
