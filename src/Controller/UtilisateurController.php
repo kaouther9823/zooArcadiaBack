@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
 use Symfony\Component\Serializer\SerializerInterface;
-
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route("/api/users")]
  
@@ -28,20 +28,24 @@ class UtilisateurController extends AbstractController
     private $roleRepository;
     private $entityManager;
      private $serializer;
-     private $mailer;
+     //private $mailer;
+    private $passwordHasher;
 
      private $logger;
 
      public function __construct(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer,
                                  RoleRepository $roleRepository, EntityManagerInterface $entityManager,
-                                 MailerInterface $mailer, LoggerInterface $logger)
+                                // MailerInterface $mailer,
+                                 UserPasswordHasherInterface $passwordHasher,
+                                 LoggerInterface $logger)
     {
         $this->utilisateurRepository = $utilisateurRepository;
         $this->roleRepository = $roleRepository;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
-        $this->mailer = $mailer;
+       // $this->mailer = $mailer;
         $this->logger = $logger;
+        $this->passwordHasher = $passwordHasher;
     }
 
     
@@ -80,25 +84,31 @@ class UtilisateurController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $utilisateur = new Utilisateur();
-        $utilisateur->setRole($this->roleRepository->find($data['role']));
+        $roles= array();
+        $roles[] = $data['role'];
+        $utilisateur->setRoles($roles);
         $utilisateur->setUsername($data['username']);
-        $utilisateur->setPassword($data['password']);
         $utilisateur->setNom($data['nom']);
         $utilisateur->setPrenom($data['prenom']);
+        $hashedPassword = $this->passwordHasher->hashPassword(
+            $utilisateur,
+            $data['password']
+        );
+        $utilisateur->setPassword($hashedPassword);
 
         try {
             $this->entityManager->persist($utilisateur);
             $this->entityManager->flush();
         }catch (UniqueConstraintViolationException $e){
-            $data = ['message' => "l'adresse mail".$data['username']." est dejà attribué à un autre utilisateur"];
+            $data = ['message' => "l'adresse mail ".$data['username']." est dejà attribué à un autre utilisateur"];
             $this->logger->critical("Utilisateur creation failed with message: {$e->getMessage()}");
             return new JsonResponse($data, Response::HTTP_CONFLICT);
         }
 
         $data = $this->serializer->normalize($utilisateur, null, ['groups' => ['utilisateur:read']]);
-        if ($utilisateur->getUserId()) {
-            $this->sendEmail($utilisateur);
-        }
+        //if ($utilisateur->getUserId()) {
+        //    $this->sendEmail($utilisateur);
+        //}
 
         return new JsonResponse($data, Response::HTTP_OK);
     }
@@ -115,10 +125,12 @@ class UtilisateurController extends AbstractController
         if (!$utilisateur) {
             throw $this->createNotFoundException('Utilisateur not found');
         }
-
-        $utilisateur->setRole($this->roleRepository->find($data['role_id']));
+        $roles= array();
+        $roles[] = $data['role'];
+        $utilisateur->setRoles($roles);
+        //$utilisateur->setRole($this->roleRepository->find($data['role_id']));
         $utilisateur->setUsername($data['username']);
-        $utilisateur->setPassword($data['password']);
+       // $utilisateur->setPassword($data['password']);
         $utilisateur->setNom($data['nom']);
         $utilisateur->setPrenom($data['prenom']);
 
@@ -146,7 +158,7 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    public function sendEmail(Utilisateur $user): Response
+   /* public function sendEmail(Utilisateur $user): Response
     {
         $email = (new Email())
             //->from('hello@example.com')
@@ -162,5 +174,5 @@ class UtilisateurController extends AbstractController
             $this->logger->error("Le mail à destination" .$user->getUsername(). " n'a pas pu être envoyé", $e->getMessage());
         }
         return new Response(null, Response::HTTP_OK);
-    }
+    }*/
 }

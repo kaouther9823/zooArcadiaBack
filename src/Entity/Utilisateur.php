@@ -5,9 +5,10 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: "App\Repository\UtilisateurRepository")]
-class Utilisateur implements UserInterface
+class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface, \Stringable
 {
 
     #[ORM\Id()]
@@ -31,10 +32,12 @@ class Utilisateur implements UserInterface
     #[Groups(['utilisateur:read', 'avis_veterinaire:read', 'rapport_veterinaire:read'])]
     private $prenom;
 
-    #[ORM\ManyToOne(targetEntity: "Role")]
-    #[ORM\JoinColumn(name: "role_id", referencedColumnName: "role_id")]
+    //#[ORM\ManyToOne(targetEntity: "Role")]
+    //#[ORM\JoinColumn(name: "role_id", referencedColumnName: "role_id")]
+   // #[Groups(['utilisateur:read', 'avis_veterinaire:read'])]
+    #[ORM\Column]
     #[Groups(['utilisateur:read', 'avis_veterinaire:read'])]
-    private $role;
+    private array $roles = [];
 
     public function getUserId(): ?int
     {
@@ -91,22 +94,23 @@ class Utilisateur implements UserInterface
         return $this;
     }
 
-    public function getRole(): ?Role
+    public function getRoles(): array
     {
-        return $this->role;
+        $roles = $this->roles;
+
+        return array_unique($roles);
     }
 
-    public function setRole(?Role $role): static
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
     {
-        $this->role = $role;
+        $this->roles = $roles;
+
         return $this;
     }
 
-
-    public function getRoles(): array
-    {
-        return array($this->role);
-    }
 
     public function eraseCredentials(): void
     {
@@ -117,5 +121,10 @@ class Utilisateur implements UserInterface
     {
         // TODO: Implement getUserIdentifier() method.
         return $this->username;
+    }
+
+    public function __toString()
+    {
+        return $this;
     }
 }

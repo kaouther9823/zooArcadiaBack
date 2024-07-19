@@ -25,6 +25,9 @@ class Service
     #[ORM\Column(length: 100)]
     private ?string $image_path = null;
 
+    #[ORM\Column(type: "blob")]
+    private $imageData;
+
     public function getServiceId(): ?int
     {
         return $this->serviceId;
@@ -63,4 +66,28 @@ class Service
 
         return $this;
     }
+
+    public function getImageData()
+    {
+        if (is_resource($this->imageData)) {
+            $data = stream_get_contents($this->imageData);
+        } else {
+            $data = $this->imageData;
+        }
+        return $data;
+    }
+
+    public function getBase64Data(): ?string
+    {
+        $data = $this->getImageData();
+        return $data !== null ? base64_encode($data) : null;
+    }
+
+    public function setImageData($imageData): static
+    {
+        $this->imageData = $imageData;
+        return $this;
+    }
+
+
 }

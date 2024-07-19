@@ -15,10 +15,10 @@ class Horraire
     private ?string $jour = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?DateTimeInterface $heure_ouverture = null;
+    private ?DateTimeInterface $heureOuverture = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?DateTimeInterface $heure_fermeture = null;
+    private ?DateTimeInterface $heureFermeture = null;
 
     public function getJour(): ?string
     {
@@ -34,25 +34,37 @@ class Horraire
 
     public function getHeureOuverture(): ?DateTimeInterface
     {
-        return $this->heure_ouverture;
+        return $this->heureOuverture;
     }
 
-    public function setHeureOuverture(DateTimeInterface $heure_ouverture): static
+    public function setHeureOuverture(DateTimeInterface $heureOuverture): static
     {
-        $this->heure_ouverture = $heure_ouverture;
+        $this->heureOuverture = $heureOuverture;
 
         return $this;
     }
 
     public function getHeureFermeture(): ?DateTimeInterface
     {
-        return $this->heure_fermeture;
+        return $this->heureFermeture;
     }
 
-    public function setHeureFermeture(DateTimeInterface $heure_fermeture): static
+    public function setHeureFermeture(DateTimeInterface $heureFermeture): static
     {
-        $this->heure_fermeture = $heure_fermeture;
+        $this->heureFermeture = $heureFermeture;
 
         return $this;
+    }
+
+    public function getFormattedData(): array
+    {
+        $formattedHeureOuverture = $this->heureOuverture ? $this->heureOuverture->format('H:i') : null;
+        $formattedHeureFermeture = $this->heureFermeture ? $this->heureFermeture->format('H:i') : null;
+
+        return [
+            'jour' => $this->jour,
+            'heureOuverture' => $formattedHeureOuverture,
+            'heureFermeture' => $formattedHeureFermeture,
+        ];
     }
 }
