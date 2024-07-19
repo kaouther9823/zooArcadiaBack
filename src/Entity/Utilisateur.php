@@ -14,29 +14,29 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface, 
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column(type: "integer")]
-    #[Groups(['utilisateur:read','avis_veterinaire:read', 'rapport_veterinaire:read'])]
+    #[Groups(['utilisateur:read','avis_veterinaire:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $userId;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['utilisateur:read','avis_veterinaire:read', 'rapport_veterinaire:read'])]
+    #[Groups(['utilisateur:read','avis_veterinaire:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $username;
 
     #[ORM\Column(type: "string", length: 50)]
     private $password;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['utilisateur:read', 'avis_veterinaire:read', 'rapport_veterinaire:read'])]
+    #[Groups(['utilisateur:read', 'avis_veterinaire:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $nom;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['utilisateur:read', 'avis_veterinaire:read', 'rapport_veterinaire:read'])]
+    #[Groups(['utilisateur:read', 'avis_veterinaire:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $prenom;
 
     //#[ORM\ManyToOne(targetEntity: "Role")]
     //#[ORM\JoinColumn(name: "role_id", referencedColumnName: "role_id")]
    // #[Groups(['utilisateur:read', 'avis_veterinaire:read'])]
     #[ORM\Column]
-    #[Groups(['utilisateur:read', 'avis_veterinaire:read'])]
+    #[Groups(['utilisateur:read', 'avis_veterinaire:read', 'rapport_employe:read'])]
     private array $roles = [];
 
     public function getUserId(): ?int

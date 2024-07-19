@@ -11,11 +11,11 @@ class Race
     #[ORM\Id()]
     #[ORM\GeneratedValue()]
     #[ORM\Column("race_id", type: "integer")]
-    #[Groups(['animal:read', 'rapport_veterinaire:read'])]
+    #[Groups(['animal:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $id;
 
     #[ORM\Column(type: "string", length: 50)]
-    #[Groups(['animal:read', 'rapport_veterinaire:read'])]
+    #[Groups(['animal:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $label;
 
     public function getId(): ?int

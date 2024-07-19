@@ -16,11 +16,11 @@ class Animal
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column("animal_id", type: 'integer')]
-    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 50)]
-    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read', 'rapport_employe:read'])]
     private $prenom;
 
     #[ORM\ManyToOne(targetEntity: "Etat")]
@@ -36,7 +36,7 @@ class Animal
 
     #[ORM\ManyToOne(targetEntity: "Race")]
     #[ORM\JoinColumn(name: "race_id", referencedColumnName: "race_id")]
-    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read'])]
+    #[Groups(['habitat:read', 'animal:read', 'rapport_veterinaire:read', 'rapport_employe:read'git ])]
     private $race;
 
     /**
