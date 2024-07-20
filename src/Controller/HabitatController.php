@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Habitat;
 use App\Repository\HabitatRepository;
@@ -132,7 +133,10 @@ return new JsonResponse($habitatData, 200);
         $habitat->setDescription($data['description']);
 
         $this->entityManager->flush();
-        return $this->json($habitat);
+        //return $this->json($habitat);
+        $habitatData = $this->serializer->normalize($habitat, null, ['groups' => ['habitat:read']]);
+
+        return new JsonResponse($habitatData, Response::HTTP_OK);
     }
 
     
@@ -147,7 +151,7 @@ return new JsonResponse($habitatData, 200);
         }
         $this->entityManager->remove($habitat);
         $this->entityManager->flush();
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
      #[Route("/{id}/images", name: "habitat_list_image", methods: ["GET"])]

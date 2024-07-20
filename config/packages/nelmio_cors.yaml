@@ -17,6 +17,12 @@ nelmio_cors:
             allow_headers: ['*']
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE', 'OPTION']
             max_age: 3600
+
+        '^/visiteur/':
+            allow_origin: [ '*' ]
+            allow_headers: [ '*' ]
+            allow_methods: [ 'POST', 'PUT', 'GET', 'DELETE', 'OPTION' ]
+            max_age: 3600
         '^/':
             allow_origin: ['*']
             allow_headers: ['*']
