@@ -65,9 +65,7 @@ class ServiceController extends AbstractController
         $service = new Service();
         $service->setNom($data['nom']);
         $service->setDescription($data['description']);
-        if (array_key_exists('imagePath', $data)) {
-            $service->setImagePath($data['imagePath']);
-        }
+
         $this->entityManager->persist($service);
         $this->entityManager->flush();
         return $this->json($service);
@@ -83,9 +81,7 @@ class ServiceController extends AbstractController
         }
         $service->setNom($data['nom']);
         $service->setDescription($data['description']);
-        if (array_key_exists('imagePath', $data)) {
-        $service->setImagePath($data['imagePath']);
-        }
+
         $this->entityManager->flush();
         return $this->json($service);
     }
@@ -99,7 +95,7 @@ class ServiceController extends AbstractController
         }
         $this->entityManager->remove($service);
         $this->entityManager->flush();
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route("/upload", name: "upload_image", methods: ("POST"))]
