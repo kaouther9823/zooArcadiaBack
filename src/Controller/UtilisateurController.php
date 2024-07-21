@@ -25,7 +25,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class UtilisateurController extends AbstractController
 {
     private $utilisateurRepository;
-    private $roleRepository;
+    private $mailer;
     private $entityManager;
      private $serializer;
      //private $mailer;
@@ -34,15 +34,15 @@ class UtilisateurController extends AbstractController
      private $logger;
 
      public function __construct(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer,
-                                  EntityManagerInterface $entityManager,
-                                // MailerInterface $mailer,
+                                 EntityManagerInterface $entityManager,
+                                 MailerInterface $mailer,
                                  UserPasswordHasherInterface $passwordHasher,
                                  LoggerInterface $logger)
     {
         $this->utilisateurRepository = $utilisateurRepository;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
-       // $this->mailer = $mailer;
+        $this->mailer = $mailer;
         $this->logger = $logger;
         $this->passwordHasher = $passwordHasher;
     }
@@ -105,9 +105,9 @@ class UtilisateurController extends AbstractController
         }
 
         $data = $this->serializer->normalize($utilisateur, null, ['groups' => ['utilisateur:read']]);
-        //if ($utilisateur->getUserId()) {
-        //    $this->sendEmail($utilisateur);
-        //}
+        if ($utilisateur->getUserId()) {
+            $this->sendEmail($utilisateur);
+        }
 
         return new JsonResponse($data, Response::HTTP_OK);
     }
@@ -156,21 +156,18 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-   /* public function sendEmail(Utilisateur $user): Response
+    public function sendEmail(Utilisateur $user): void
     {
         $email = (new Email())
-            //->from('hello@example.com')
             ->to($user->getUsername())
             ->priority(Email::PRIORITY_HIGH)
             ->subject('Inscription au site Arcadia')
-            ->text('Sending emails is fun again!')
             ->html("<p>Vous êtes inscrit au site Arcadia zoo. Veuillez contacter l\'administrateur pour récupérer votre mot de passe</p>");
 
         try {
             $this->mailer->send($email);
         } catch (TransportExceptionInterface $e) {
-            $this->logger->error("Le mail à destination" .$user->getUsername(). " n'a pas pu être envoyé", $e->getMessage());
+            $this->logger->error("Le mail à destination de : " .$user->getUsername(). " n'a pas pu être envoyé", (array)$e->getMessage());
         }
-        return new Response(null, Response::HTTP_OK);
-    }*/
+    }
 }

@@ -32,7 +32,7 @@ class AnimalController extends AbstractController
     private $raceRepository;
     private $etatRepository;
     private $entityManager;
-private $animalImageRepository;
+    private $animalImageRepository;
     private $logger;
 
     private $serializer;
