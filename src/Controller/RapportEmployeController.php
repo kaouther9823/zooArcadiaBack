@@ -84,8 +84,10 @@ class RapportEmployeController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $rapport = new RapportEmploye();
-        // todo recupérer user dynamiquement avec getUser()
-        $rapport->setEmploye($this->utilisateurRepository->find(2));
+        $currentUser = $this->getUser();
+
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $rapport->setEmploye($user);
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
         $rapport->setQuantite($data['quantite']);
@@ -114,8 +116,10 @@ class RapportEmployeController extends AbstractController
         if (!$rapport) {
             throw $this->createNotFoundException('Rapport not found');
         }
-        // todo recupérer user dynamiquement avec getUser()
-        $rapport->setEmploye($this->utilisateurRepository->find(53));
+        $currentUser = $this->getUser();
+
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $rapport->setEmploye($user);
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
         $rapport->setQuantite($data['quantite']);

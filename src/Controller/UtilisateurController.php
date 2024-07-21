@@ -34,13 +34,12 @@ class UtilisateurController extends AbstractController
      private $logger;
 
      public function __construct(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer,
-                                 RoleRepository $roleRepository, EntityManagerInterface $entityManager,
+                                  EntityManagerInterface $entityManager,
                                 // MailerInterface $mailer,
                                  UserPasswordHasherInterface $passwordHasher,
                                  LoggerInterface $logger)
     {
         $this->utilisateurRepository = $utilisateurRepository;
-        $this->roleRepository = $roleRepository;
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
        // $this->mailer = $mailer;
@@ -128,7 +127,6 @@ class UtilisateurController extends AbstractController
         $roles= array();
         $roles[] = $data['role'];
         $utilisateur->setRoles($roles);
-        //$utilisateur->setRole($this->roleRepository->find($data['role_id']));
         $utilisateur->setUsername($data['username']);
        // $utilisateur->setPassword($data['password']);
         $utilisateur->setNom($data['nom']);

@@ -53,8 +53,10 @@ class AvisVeterinaireController extends AbstractController
 
         $avisVeterinaire = new AvisVeterinaire();
         $avisVeterinaire->setCommentaire($data['commentaire']);
-        //todo remplacer par getUser
-        $avisVeterinaire->setVeterinaire($this->utilisateurRepository->find(53));
+        $currentUser = $this->getUser();
+
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $avisVeterinaire->setVeterinaire($user);
         $avisVeterinaire->setHabitat($this->habitatRepository->find($data['habitat']));
         $avisVeterinaire->setDate(new \DateTime());
 
@@ -80,10 +82,13 @@ class AvisVeterinaireController extends AbstractController
 
         $avisVeterinaire = $this->avisVeterinaireRepository->find($id);
 
-        //todo remplacer par getUser
-        $avisVeterinaire->setVeterinaire($this->utilisateurRepository->find(53));
+        $currentUser = $this->getUser();
+
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $avisVeterinaire->setVeterinaire($user);
         $avisVeterinaire->setHabitat($this->habitatRepository->find($data['habitat']));
         $avisVeterinaire->setDate(new \DateTime());
+        $avisVeterinaire->setCommentaire($data['commentaire']);
 
         $this->entityManager->flush();
 
