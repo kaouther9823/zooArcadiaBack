@@ -75,7 +75,7 @@ Ci-dessous les commandes pratiques Symfony
 ```symfony console make:migration```
 ## Exécuter les migrations
 ``` symfony console doctrine:migrations:migrate```
-## Configurer CROS
+## Configurer CORS
 - installer le bundle sensio/framework-extra-bundle
 ```composer require nelmio/cors-bundle ```
 - Configurer le bundle : https://symfony.com/bundles/NelmioCorsBundle/current/index.html

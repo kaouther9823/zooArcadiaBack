@@ -29,7 +29,6 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            access_denied_url: /403
             stateless: true
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -44,30 +43,27 @@ security:
         - { path: ^/api/login, roles: PUBLIC_ACCESS  }
         - { path: ^/api/logout, roles: IS_AUTHENTICATED_FULLY }
         # access libre
-        - { path: ^/api/services, roles: [PUBLIC_ACCESS],  methods: [GET]}
-        - { path: ^/api/habitats, methods: [GET], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/horraires, methods: [GET], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/animaux, methods: [GET], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/avis, methods: [GET, POST], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/etats, methods: [GET], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/nouritures, methods: [GET], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/races, methods: [GET], roles: [PUBLIC_ACCESS]}
-        - { path: ^/api/contact, methods: [POST], roles: [PUBLIC_ACCESS]}
+        - { path: ^/api/contact, methods: [POST]}
+
+       # - { path: ^/api/horraires, roles: PUBLIC_ACCESS, methods: [GET]}
+        #- { path: ^/api/animaux, methods: [GET], roles: [PUBLIC_ACCESS]}
+       # - { path: ^/api/avis, methods: [GET, POST],}
+#        - { path: ^/api/etats, methods: [GET], roles: [PUBLIC_ACCESS]}
+#        - { path: ^/api/nouritures, methods: [GET], roles: [PUBLIC_ACCESS]}
+#        - { path: ^/api/races, methods: [GET], roles: [PUBLIC_ACCESS]}
             # /api/services
-        - { path: ^/api/services, roles: ROLE_ADMIN }
-        - { path: ^/api/services, roles: ROLE_EMPLOYE }
+        - { path: ^/api/services, methods: [GET]}
+        - { path: ^/api/services, roles: [ROLE_ADMIN, ROLE_EMPLOYE], methods: [POST, PUT, DELETE]}
 
             # /api/habitats
-        - { path: ^/api/habitats, roles: ROLE_ADMIN }
+        - { path: ^/api/habitats, roles: ROLE_ADMIN , methods: [POST, PUT, DELETE]}
 
             # /api/animaux
-        - { path: ^/api/animaux, roles: ROLE_ADMIN }
-        - { path: ^/api/animaux, roles: ROLE_EMPLOYE }
-        - { path: ^/api/animaux, roles: ROLE_VETERINAIRE, methods: [ GET, PUT ] }
+        - { path: ^/api/animaux, roles: ROLE_ADMIN , methods: [POST, PUT, DELETE]}
+        - { path: ^/api/animaux, roles: ROLE_VETERINAIRE, methods: [ PUT ] }
 
             # /api/avis
-        - { path: ^/api/avis, roles: ROLE_ADMIN, methods: [ GET ] }
-        - { path: ^/api/avis, roles: ROLE_EMPLOYE }
+        - { path: ^/api/avis, roles: ROLE_EMPLOYE, methods: [PUT] }
 
         # /api/rapports/employes
         - { path: ^/api/rapports/employes, roles: [ROLE_ADMIN,ROLE_VETERINAIRE, ROLE_EMPLOYE] , methods: [ GET ] }
@@ -88,7 +84,7 @@ security:
         # /api/contact
         - { path: ^/api/contact, methods: [ POST ] }
         # /api/consultations
-        - { path: ^/api/consultations, roles: ROLE_ADMIN, methods: [ GET ] }
+        #- { path: ^/api/consultations, roles: ROLE_ADMIN, methods: [ GET ] }
         # /api/horraires
         - { path: ^/api/horraires, roles: ROLE_ADMIN, methods: [ GET, PUT ] }
         - { path: ^/api/horraires, roles: ROLE_EMPLOYE, methods: [ GET ] }
