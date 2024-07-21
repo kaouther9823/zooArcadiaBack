@@ -23,10 +23,8 @@ class AvisVisiteurController extends AbstractController
 {
     private $avisVisiteurRepository;
      private $entityManager;
-
      private $serializer;
      private $logger;
-
 
      public function __construct(AvisVisiteurRepository $avisVisiteurRepository,
                                  EntityManagerInterface $entityManager,
@@ -39,7 +37,6 @@ class AvisVisiteurController extends AbstractController
         $this->logger = $logger;
 
     }
-
     
      #[Route("/", name: "avis_visiteur_index", methods: ["GET"])]
      
@@ -59,8 +56,6 @@ class AvisVisiteurController extends AbstractController
         return $this->json($avis);
     }
 
-
-    
      #[Route("/{id}", name: "avis_visiteur_show", methods: ["GET"])]
      
     public function show($id): JsonResponse
@@ -74,7 +69,6 @@ class AvisVisiteurController extends AbstractController
         return $this->json($avis);
     }
 
-    
      #[Route("/", name: "avis_visiteur_create", methods: ["POST"])]
      
     public function create(Request $request): JsonResponse

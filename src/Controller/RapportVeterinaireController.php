@@ -100,10 +100,9 @@ class RapportVeterinaireController extends AbstractController
 
         $rapport = new RapportVeterinaire();
         $currentUser = $this->getUser();
-        //todo use getUser
-        //$user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
-        $rapport->setVeterinaire($this->utilisateurRepository->find(53));
-        //$rapport->setVeterinaire($user);
+
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $rapport->setVeterinaire($user);
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setEtat($this->etatRepository->find($data['etat']));
         $rapport->setNouriture($this->nouritureRepository->find($data['nouriture']));
@@ -131,7 +130,10 @@ class RapportVeterinaireController extends AbstractController
         if (!$rapport) {
             throw $this->createNotFoundException('Rapport not found');
         }
+        $currentUser = $this->getUser();
 
+        $user = $this->utilisateurRepository->findOneBy(['username'=>$currentUser->getUserIdentifier()]);
+        $rapport->setVeterinaire($user);
         $rapport->setAnimal($this->animalRepository->find($data['animal']));
         $rapport->setDate(new DateTime());
         $rapport->setDetail($data['commentaire']);
