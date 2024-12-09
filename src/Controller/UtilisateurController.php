@@ -17,6 +17,8 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Utilisateur;
 use App\Repository\UtilisateurRepository;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -33,10 +35,13 @@ class UtilisateurController extends AbstractController
 
      private $logger;
 
+    private CsrfTokenManagerInterface $csrfTokenManager;
+
      public function __construct(UtilisateurRepository $utilisateurRepository, SerializerInterface $serializer,
                                  EntityManagerInterface $entityManager,
                                  MailerInterface $mailer,
                                  UserPasswordHasherInterface $passwordHasher,
+                                 CsrfTokenManagerInterface $csrfTokenManager,
                                  LoggerInterface $logger)
     {
         $this->utilisateurRepository = $utilisateurRepository;
@@ -45,8 +50,14 @@ class UtilisateurController extends AbstractController
         $this->mailer = $mailer;
         $this->logger = $logger;
         $this->passwordHasher = $passwordHasher;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
-
+    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    public function getCsrfToken(): JsonResponse
+    {
+        $token = $this->csrfTokenManager->getToken('user_form')->getValue();
+        return new JsonResponse(['csrfToken' => $token]);
+    }
     
      #[Route("/", name: "utilisateur_index", methods: ["GET"])]
      
@@ -80,6 +91,11 @@ class UtilisateurController extends AbstractController
      
     public function create(Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('user_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $utilisateur = new Utilisateur();
@@ -117,6 +133,11 @@ class UtilisateurController extends AbstractController
      
     public function update($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('user_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $utilisateur = $this->utilisateurRepository->find($id);
@@ -142,8 +163,13 @@ class UtilisateurController extends AbstractController
     
      #[Route("/{id}", name: "utilisateur_delete", methods: ["DELETE"])]
      
-    public function delete($id): JsonResponse
+    public function delete($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('user_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $utilisateur = $this->utilisateurRepository->find($id);
 
         if (!$utilisateur) {

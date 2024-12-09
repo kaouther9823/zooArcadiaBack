@@ -14,20 +14,29 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[Route("/api/services")]
 class ServiceController extends AbstractController
 {
-    private $serviceRepository;
+    private ServiceRepository $serviceRepository;
     private EntityManagerInterface $entityManager;
-    private $logger;
+    private LoggerInterface $logger;
+    private CsrfTokenManagerInterface $csrfTokenManager;
+
+    private \HTMLPurifier $htmlPurifier;
 
     public function __construct(ServiceRepository $serviceRepository, LoggerInterface $logger,
-                                EntityManagerInterface $entityManager)
+                                EntityManagerInterface $entityManager, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->serviceRepository = $serviceRepository;
         $this->entityManager = $entityManager;
         $this->logger = $logger;
+        $this->csrfTokenManager = $csrfTokenManager;
+
+        $config = \HTMLPurifier_Config::createDefault();
+        $this->htmlPurifier = new \HTMLPurifier($config);
     }
 
     #[Route("/", name: "service_index", methods: ["GET"])]
@@ -37,11 +46,11 @@ class ServiceController extends AbstractController
         $serviceData = [];
 
         foreach ($services as $service) {
-            array_push($serviceData, [
+            $serviceData[] = [
                 'serviceId' => $service->getServiceId(),
                 'nom' => $service->getNom(),
                 'description' => $service->getDescription(),
-            ]);
+            ];
 
         }
 
@@ -58,13 +67,25 @@ class ServiceController extends AbstractController
         return $this->json($service);
     }
 
+    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    public function getCsrfToken(): JsonResponse
+    {
+        $token = $this->csrfTokenManager->getToken('service_form')->getValue();
+        return new JsonResponse(['csrfToken' => $token]);
+    }
+
     #[Route("/", name: "service_create", methods: ["POST"])]
     public function create(Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('service_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
         $service = new Service();
-        $service->setNom($data['nom']);
-        $service->setDescription($data['description']);
+        $service->setNom($this->htmlPurifier->purify($data['nom'] ?? ''));
+        $service->setDescription($this->htmlPurifier->purify($data['description'] ?? ''));
 
         $this->entityManager->persist($service);
         $this->entityManager->flush();
@@ -74,21 +95,31 @@ class ServiceController extends AbstractController
     #[Route("/{id}", name: "service_update", methods: ["PUT"])]
     public function update($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('service_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
         $service = $this->serviceRepository->find($id);
         if (!$service) {
             throw $this->createNotFoundException('Service not found');
         }
-        $service->setNom($data['nom']);
-        $service->setDescription($data['description']);
+        $service->setNom($this->htmlPurifier->purify($data['nom'] ?? ''));
+        $service->setDescription($this->htmlPurifier->purify($data['description'] ?? ''));
 
         $this->entityManager->flush();
         return $this->json($service);
     }
 
     #[Route("/{id}", name: "service_delete", methods: ["DELETE"])]
-    public function delete($id): JsonResponse
+    public function delete($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('service_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+
         $service = $this->serviceRepository->find($id);
         if (!$service) {
             throw $this->createNotFoundException('Service not found');
@@ -178,12 +209,12 @@ class ServiceController extends AbstractController
         $serviceData = [];
 
         foreach ($services as $service) {
-            array_push($serviceData, [
+            $serviceData[] = [
                 'serviceId' => $service->getServiceId(),
                 'nom' => $service->getNom(),
                 'description' => $service->getDescription(),
                 'imageData' => $service->getBase64Data()
-            ]);
+            ];
 
         }
 

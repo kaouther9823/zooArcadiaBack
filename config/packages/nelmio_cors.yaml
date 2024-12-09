@@ -1,6 +1,6 @@
 nelmio_cors:
     defaults:
-        allow_credentials: false
+        allow_credentials: true
         allow_origin: []
         allow_headers: []
         allow_methods: []
@@ -15,11 +15,13 @@ nelmio_cors:
         '^/api/':
             allow_origin: ['*']
             allow_headers: ['*']
+            allow_credentials: true
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE', 'OPTION']
             max_age: 3600
         '^/':
             allow_origin: ['*']
             allow_headers: ['*']
+            allow_credentials: true
             allow_methods: ['POST', 'PUT', 'GET', 'DELETE', 'OPTION']
             max_age: 3600
             hosts: ['^api\.']

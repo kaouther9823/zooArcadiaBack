@@ -1,0 +1,46 @@
+version: "3.3"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    volumes:
+      - ./backend:/var/www/symfony
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "8080:90"
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony_user
+      MYSQL_PASSWORD: symfony_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3307"
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27018"
+
+volumes:
+  mysql_data:
+  mongodb_data:

@@ -5,7 +5,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-
 #[ORM\Entity(repositoryClass: "App\Repository\ServiceRepository")]
 class Service
 {
@@ -17,7 +16,6 @@ class Service
 
     #[ORM\Column(type: "string", length: 50)]
     private $nom;
-
 
     #[ORM\Column(type: "string", length: 50)]
     private $description;

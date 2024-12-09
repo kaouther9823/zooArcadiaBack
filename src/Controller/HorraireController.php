@@ -11,17 +11,23 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[Route('/api/horraires')]
 class HorraireController extends AbstractController {
 
     private $horraireRepository;
     private $entityManager;
+    private $csrfTokenManager;
 
-    public function __construct(HorraireRepository $horraireRepository, EntityManagerInterface $entityManager)
+    public function __construct(HorraireRepository $horraireRepository,
+                                CsrfTokenManagerInterface $csrfTokenManager,
+                                EntityManagerInterface $entityManager)
 {
     $this->horraireRepository = $horraireRepository;
     $this->entityManager = $entityManager;
+    $this->csrfTokenManager = $csrfTokenManager;
 }
 
 
@@ -37,10 +43,20 @@ class HorraireController extends AbstractController {
         return $this->json($formatedHorraires);
     }
 
-
+    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    public function getCsrfToken(): JsonResponse
+    {
+        $token = $this->csrfTokenManager->getToken('horraire_form')->getValue();
+        return new JsonResponse(['csrfToken' => $token]);
+    }
+    
     #[Route('', name: 'app_horraire_edit', methods: ['POST'])]
     public function edit(Request $request): Response
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('horraire_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
         $data = json_decode($request->getContent(), true);
 
         if (!is_array($data)) {

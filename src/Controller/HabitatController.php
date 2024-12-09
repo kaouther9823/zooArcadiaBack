@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Habitat;
 use App\Repository\HabitatRepository;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route("/api/habitats")]
@@ -22,14 +24,15 @@ class HabitatController extends AbstractController
 {
     private $habitatRepository;
     private $habitatImageRepository;
-     private $entityManager;
-
+    private $entityManager;
     private $serializer;
-
+    private $logger;
+    private CsrfTokenManagerInterface $csrfTokenManager;
     public function __construct(HabitatImageRepository $habitatImageRepository,
                                 HabitatRepository $habitatRepository,
                                 EntityManagerInterface $entityManager,
                                 SerializerInterface $serializer,
+                                CsrfTokenManagerInterface $csrfTokenManager,
                                 LoggerInterface $logger)
     {
         $this->habitatImageRepository = $habitatImageRepository;
@@ -37,8 +40,15 @@ class HabitatController extends AbstractController
         $this->habitatRepository = $habitatRepository;
         $this->logger = $logger;
         $this->serializer = $serializer;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
 
+    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    public function getCsrfToken(): JsonResponse
+    {
+        $token = $this->csrfTokenManager->getToken('habitat_form')->getValue();
+        return new JsonResponse(['csrfToken' => $token]);
+    }
 
     #[Route("/", name: "habitat_index", methods: ["GET"])]
     public function indexAll(): JsonResponse
@@ -108,6 +118,11 @@ return new JsonResponse($habitatData, 200);
      #[Route("/", name: "habitat_create", methods: ["POST"])]
     public function create(Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $data = json_decode($request->getContent(), true);
         $habitat = new Habitat();
         $habitat->setNom($data['nom']);
@@ -122,6 +137,11 @@ return new JsonResponse($habitatData, 200);
      
     public function update($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $data = json_decode($request->getContent(), true);
         $habitat = $this->habitatRepository->find($id);
 
@@ -142,8 +162,13 @@ return new JsonResponse($habitatData, 200);
     
      #[Route("/{id}", name: "habitat_delete", methods: ["DELETE"])]
      
-    public function delete($id): JsonResponse
+    public function delete($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $habitat = $this->habitatRepository->find($id);
 
         if (!$habitat) {

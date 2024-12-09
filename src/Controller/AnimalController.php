@@ -21,6 +21,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Animal;
 use App\Repository\AnimalRepository;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 
@@ -36,10 +38,12 @@ class AnimalController extends AbstractController
     private $logger;
 
     private $serializer;
+    private CsrfTokenManagerInterface $csrfTokenManager;
 
     public function __construct(AnimalRepository       $animalRepository, HabitatRepository $habitatRepository,
                                 RaceRepository         $raceRepository, EtatRepository $etatRepository,
                                 EntityManagerInterface $entityManager, LoggerInterface $logger,
+                                CsrfTokenManagerInterface $csrfTokenManager,
                                 SerializerInterface $serializer, AnimalImageRepository $animalImageRepository)
     {
         $this->animalRepository = $animalRepository;
@@ -50,8 +54,17 @@ class AnimalController extends AbstractController
         $this->logger = $logger;
         $this->serializer = $serializer;
         $this->animalImageRepository = $animalImageRepository;
+        $this->csrfTokenManager = $csrfTokenManager;
+        
     }
 
+    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    public function getCsrfToken(): JsonResponse
+    {
+        $token = $this->csrfTokenManager->getToken('animal_form')->getValue();
+        return new JsonResponse(['csrfToken' => $token]);
+    }
+    
     #[Route("/", name: "animal_index", methods: ["GET"])]
     public function index(): JsonResponse
     {
@@ -62,25 +75,12 @@ class AnimalController extends AbstractController
     }
 
     #[Route("/habitat/{id}", name: "animal_index_by_habitat", methods: ["GET"])]
-    public function indexVByHabitat($id): JsonResponse
+    public function indexByHabitat($id): JsonResponse
     {
         $animals = $this->animalRepository->findByHabitat($id);
-
-/*        $animalsData = [];
-        foreach ($animals as $animal) {
-            $animalsData[] = [
-                'id' => $animal->getId(),
-                'race' => $animal->getRace(),
-                'etat' => $animal->getEtat(),
-                'prenom' => $animal->getPrenom(),
-            ];
-        }*/
-
         $animalData = $this->serializer->normalize($animals, null, ['groups' => ['animal:read']]);
-
         return new JsonResponse($animalData, Response::HTTP_OK);
     }
-
 
     #[Route("/{id}", name: "animal_show", methods: ["GET"])]
     public function show($id): JsonResponse
@@ -90,54 +90,49 @@ class AnimalController extends AbstractController
             throw $this->createNotFoundException('Animal not found');
         }
         $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
-
         return new JsonResponse($animalData, Response::HTTP_OK);
     }
 
     #[Route("/", name: "animal_create", methods: ["POST"])]
     public function create(Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('animal_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $data = json_decode($request->getContent(), true);
         $habitat = $this->habitatRepository->find($data['habitatId']);
         $animal = new Animal();
-        $animal->setPrenom($data['prenom']);
-        $animal->setEtat($this->etatRepository->find($data['etatId']));
-        $animal->setHabitat($habitat);
-        $animal->setRace($this->raceRepository->find($data['raceId']));
-        $this->entityManager->persist($animal);
-        $this->entityManager->flush();
-
-        $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
-
-        return new JsonResponse($animalData, Response::HTTP_OK);
+        return $this->prepareAnimalResponse($animal, $data, $habitat);
     }
 
     #[Route("/{id}", name: "animal_update", methods: ["PUT"])]
     public function update($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('animal_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $data = json_decode($request->getContent(), true);
         $animal = $this->animalRepository->find($id);
         if (!$animal) {
             throw $this->createNotFoundException('Animal not found');
         }
         $habitat = $this->habitatRepository->find($data['habitatId']);
-        $animal->setPrenom($data['prenom']);
-        $animal->setEtat($this->etatRepository->find($data['etatId']));
-        $animal->setHabitat($habitat);
-        $animal->setRace($this->raceRepository->find($data['raceId']));
-        $this->entityManager->persist($animal);
-        $this->entityManager->flush();
-        $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
-
-        return new JsonResponse($animalData, Response::HTTP_OK);
+        return $this->prepareAnimalResponse($animal, $data, $habitat);
     }
 
-
     #[Route("/{id}", name: "animal_delete", methods: ["DELETE"])]
-    public function delete($id): JsonResponse
+    public function delete($id, Request $request): JsonResponse
     {
+        $csrfToken = $request->request->get('_csrf_token');
+        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('animal_form', $csrfToken))) {
+            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $animal = $this->animalRepository->find($id);
-
         if (!$animal) {
             throw $this->createNotFoundException('Animal not found');
         }
@@ -150,9 +145,7 @@ class AnimalController extends AbstractController
 
     public function listImage($id): JsonResponse
     {
-
         $animal = $this->animalRepository->find($id);
-
         if (!$animal) {
             throw $this->createNotFoundException('Animal not found');
         }
@@ -164,7 +157,6 @@ class AnimalController extends AbstractController
                 'base64Data' => $image->getBase64Data()
             ];
         }
-
         return new JsonResponse($animalData, 200);
     }
 
@@ -262,5 +254,23 @@ class AnimalController extends AbstractController
         $this->entityManager->flush();
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * @param Animal $animal
+     * @param mixed $data
+     * @param $habitat
+     * @return JsonResponse
+     */
+    public function prepareAnimalResponse(Animal $animal, mixed $data, $habitat): JsonResponse
+    {
+        $animal->setPrenom($data['prenom']);
+        $animal->setEtat($this->etatRepository->find($data['etatId']));
+        $animal->setHabitat($habitat);
+        $animal->setRace($this->raceRepository->find($data['raceId']));
+        $this->entityManager->persist($animal);
+        $this->entityManager->flush();
+        $animalData = $this->serializer->normalize($animal, null, ['groups' => ['animal:read']]);
+        return new JsonResponse($animalData, Response::HTTP_OK);
     }
 }
