@@ -72,5 +72,13 @@ class Service
         return $this;
     }
 
+    /**
+     * @param mixed $serviceId
+     */
+    public function setServiceId($serviceId): void
+    {
+        $this->serviceId = $serviceId;
+    }
+
 
 }

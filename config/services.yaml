@@ -29,10 +29,10 @@ services:
     App\EventListener\JWTListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 8 }
-
     App\Controller\SecurityController:
         arguments:
             $jwtAuthenticator: '@security.authenticator.jwt.api'
+         #   $loginLimiter: '@login_attempts.limiter'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

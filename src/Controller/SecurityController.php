@@ -12,7 +12,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\LimiterInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Annotation\Route;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -26,6 +29,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
     public function __construct(LoggerInterface $logger, UserPasswordHasherInterface $passwordEncoder,
                                 JWTTokenManagerInterface $JWTManager, UserProviderInterface $userProvider,
                                 UtilisateurRepository $utilisateurRepository, $jwtAuthenticator)
+                               // RateLimiterFactory  $loginLimiter)
     {
         $this->logger = $logger;
         $this->passwordEncoder = $passwordEncoder;
@@ -33,20 +37,36 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
         $this->userProvider = $userProvider;
         $this->utilisateurRepository = $utilisateurRepository;
         $this->jwtAuthenticator = $jwtAuthenticator;
+       // $this->loginLimiter = $loginLimiter;
 
     }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(Request $request): Response
     {
+       // $limiter = $this->loginLimiter->create($request->getClientIp());
+
+        // Vérifiez si la limite est atteinte
+       // if (!$limiter->consume(1)->isAccepted()) {
+       /*     return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Too many login attempts. Please try again later.'
+            ], Response::HTTP_TOO_MANY_REQUESTS);
+        }*/
+
         $data = json_decode($request->getContent(), true);
 
         $this->logger->info(json_encode($data));
 
         $email = $data['username'];
         $password = $data['password'];
-
-        $user = $this->userProvider->loadUserByIdentifier($email);
+        try {
+            $user = $this->userProvider->loadUserByIdentifier($email);
+        }catch (HttpException $httpException){
+            if ($httpException->getStatusCode() == Response::HTTP_UNAUTHORIZED){
+                return new JsonResponse(['message' => 'Utilisateur non reconnu. Vérifier votre Email!'], Response::HTTP_UNAUTHORIZED);
+            }
+        }
 
 
         $this->logger->debug('User {userId} has logged in', [
@@ -56,18 +76,19 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
         $this->logger->debug('password verify {verif}', ['verif'=> $this->passwordEncoder->isPasswordValid($user, $password)]);
         // $this->logger->info(json_encode($user));
         if (!$user || !$this->passwordEncoder->isPasswordValid($user, $password)) {
-            return $this->json(['message' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Mot de passe erroné!'], Response::HTTP_UNAUTHORIZED);
         }
         $userObject = $this->utilisateurRepository->findOneBy(['username' => $email]);
         $token = $this->JWTManager->createFromPayload($user, [ 'username' => $user->getUserIdentifier(),
             'firstname' => $userObject->getPrenom(),
             'lastname' => $userObject->getNom(),
-            'roles' => $user->getRoles()]);
+            'roles' => $user->getRoles(),
+            'mail' => $userObject->getUsername()]);
         $this->logger->debug('token:: {verif}', ['token'=> $token]);
 
         $response = new JsonResponse(['status' => 'success', 'token' => $token], 200);
         $response->headers->setCookie(
-            Cookie::create('jwt_token', $token, time() + 3600, '/', null, false, true, false, 'strict')
+            Cookie::create('jwt_token', $token, time() + 3600, '/', null, true, true, false, 'strict')
         );
         return $response;
     }
@@ -78,6 +99,10 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
         $response = new JsonResponse(['status' => 'success'], 200);
         // Supprimer le cookie JWT
         $response->headers->clearCookie('jwt_token');
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:8080');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', '*');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
         return $response->send();
     }
@@ -142,6 +167,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
                 'role' => $authData['roles'] ?? null,
                 'firstname' => $authData['firstname'] ?? null,
                 'lastname' => $authData['lastname'] ?? null,
+                'mail' => $authData['username'] ?? null,
             ]);
         } catch (AuthenticationException $exception) {
             $logger->error('Authentication failed', ['error' => $exception->getMessage()]);

@@ -36,7 +36,6 @@ class AnimalController extends AbstractController
     private $entityManager;
     private $animalImageRepository;
     private $logger;
-
     private $serializer;
     private CsrfTokenManagerInterface $csrfTokenManager;
 
@@ -58,7 +57,7 @@ class AnimalController extends AbstractController
         
     }
 
-    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    #[Route("/csrf/token", name: "animal_get_csrf_token", methods: ["GET"])]
     public function getCsrfToken(): JsonResponse
     {
         $token = $this->csrfTokenManager->getToken('animal_form')->getValue();
@@ -96,11 +95,11 @@ class AnimalController extends AbstractController
     #[Route("/", name: "animal_create", methods: ["POST"])]
     public function create(Request $request): JsonResponse
     {
-        $csrfToken = $request->request->get('_csrf_token');
+/*        $csrfToken = $request->request->get('_csrf_token');
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('animal_form', $csrfToken))) {
             return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
-        }
-        
+        }*/
+
         $data = json_decode($request->getContent(), true);
         $habitat = $this->habitatRepository->find($data['habitatId']);
         $animal = new Animal();
@@ -110,11 +109,11 @@ class AnimalController extends AbstractController
     #[Route("/{id}", name: "animal_update", methods: ["PUT"])]
     public function update($id, Request $request): JsonResponse
     {
-        $csrfToken = $request->request->get('_csrf_token');
+  /*      $csrfToken = $request->request->get('_csrf_token');
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('animal_form', $csrfToken))) {
             return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
         }
-        
+        */
         $data = json_decode($request->getContent(), true);
         $animal = $this->animalRepository->find($id);
         if (!$animal) {

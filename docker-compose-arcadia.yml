@@ -2,9 +2,7 @@ version: "3.3"
 
 services:
   backend:
-    build:
-      context: ./backend
-    container_name: backend
+    image: docker.io/library/backend:latest
     volumes:
       - ./backend:/var/www/symfony
     ports:
@@ -14,9 +12,7 @@ services:
       - mongodb
 
   frontend:
-    build:
-      context: ./frontend
-    container_name: frontend
+    image: docker.io/library/frontend:latest
     ports:
       - "8080:90"
 
@@ -31,7 +27,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3306:3307"
+      - "3307:3306"
 
   mongodb:
     image: mongo:5.0
@@ -39,7 +35,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     ports:
-      - "27017:27018"
+      - "27018:27017"
 
 volumes:
   mysql_data:

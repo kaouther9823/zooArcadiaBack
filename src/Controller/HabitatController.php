@@ -43,7 +43,7 @@ class HabitatController extends AbstractController
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
-    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    #[Route("/csrf/token", name: "habitat_get_csrf_token", methods: ["GET"])]
     public function getCsrfToken(): JsonResponse
     {
         $token = $this->csrfTokenManager->getToken('habitat_form')->getValue();
@@ -118,10 +118,10 @@ return new JsonResponse($habitatData, 200);
      #[Route("/", name: "habitat_create", methods: ["POST"])]
     public function create(Request $request): JsonResponse
     {
-        $csrfToken = $request->request->get('_csrf_token');
-        if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
-            return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
-        }
+        //$csrfToken = $request->request->get('_csrf_token');
+        //if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
+        //    return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
+        //}
         
         $data = json_decode($request->getContent(), true);
         $habitat = new Habitat();
@@ -137,10 +137,10 @@ return new JsonResponse($habitatData, 200);
      
     public function update($id, Request $request): JsonResponse
     {
-        $csrfToken = $request->request->get('_csrf_token');
+   /*     $csrfToken = $request->request->get('_csrf_token');
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
             return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
-        }
+        }*/
         
         $data = json_decode($request->getContent(), true);
         $habitat = $this->habitatRepository->find($id);
@@ -164,10 +164,10 @@ return new JsonResponse($habitatData, 200);
      
     public function delete($id, Request $request): JsonResponse
     {
-        $csrfToken = $request->request->get('_csrf_token');
+ /*       $csrfToken = $request->request->get('_csrf_token');
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('habitat_form', $csrfToken))) {
             return new JsonResponse(['error' => 'Invalid CSRF token.'], Response::HTTP_FORBIDDEN);
-        }
+        }*/
         
         $habitat = $this->habitatRepository->find($id);
 

@@ -1,33 +1,57 @@
-# Utiliser une image PHP officielle avec Apache
+# Utiliser l'image PHP 8.2 officielle avec FPM
 FROM php:8.2-fpm
 
-# Installer les dépendances nécessaires
+# Installer les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    libicu-dev \
-    libpq-dev \
-    libzip-dev \
-    zip \
     libpng-dev \
-    libjpeg-dev \
-    && docker-php-ext-install \
-    intl pdo_mysql zip gd mongodb
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    wget \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer les extensions PHP requises pour Symfony
+RUN docker-php-ext-install \
+    pdo_mysql \
+    intl \
+    zip \
+    mbstring \
+    gd
+
+# Installer l'extension MongoDB
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb
 
 # Installer Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Copier le code Symfony dans le conteneur
+# Installer Symfony CLI
+RUN curl -sS https://get.symfony.com/cli/installer | bash \
+    && mv /root/.symfony*/bin/symfony /usr/local/bin/symfony
+
+# Définir le répertoire de travail
 WORKDIR /var/www/symfony
-COPY . /var/www/symfony
 
-# Donner les permissions
-RUN chown -R www-data:www-data /var/www/symfony
+# Copier les fichiers de l'application
+COPY . .
 
-# Installer les dépendances Symfony
-RUN composer install --no-scripts --no-interaction
+# Nettoyer le cache de Composer
+RUN composer clear-cache
 
-# Exposer le port pour le backend
+# Installer Symfony Flex si nécessaire
+RUN composer require symfony/flex --no-scripts --no-interaction --ignore-platform-reqs
+
+# Installer les dépendances Composer
+RUN composer install --no-scripts --no-interaction --optimize-autoloader
+
+# Permissions pour éviter les conflits sur Windows
+RUN chmod -R 775 /var/www/symfony
+
+# Exposer le port utilisé par PHP-FPM
 EXPOSE 9000
 
+# Commande par défaut
 CMD ["php-fpm"]

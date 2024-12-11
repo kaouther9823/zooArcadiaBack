@@ -38,8 +38,8 @@ class ConsultationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         $animalName = $data['prenom'] ?? null;
-        $animalRace = $data['race.label'] ?? null;
-        $animalHabitat = $data['habitat.nom'] ?? null;
+        $animalRace = $data['race']['label'] ?? null;
+        $animalHabitat = $data['habitat']['nom'] ?? null;
 
         if (!$animalName) {
             return new JsonResponse(['error' => 'Animal name is required'], Response::HTTP_BAD_REQUEST);

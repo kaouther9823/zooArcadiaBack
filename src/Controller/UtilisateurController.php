@@ -52,7 +52,7 @@ class UtilisateurController extends AbstractController
         $this->passwordHasher = $passwordHasher;
         $this->csrfTokenManager = $csrfTokenManager;
     }
-    #[Route("/csrf/token", name: "get_csrf_token", methods: ["GET"])]
+    #[Route("/csrf/token", name: "utilisateur_get_csrf_token", methods: ["GET"])]
     public function getCsrfToken(): JsonResponse
     {
         $token = $this->csrfTokenManager->getToken('user_form')->getValue();

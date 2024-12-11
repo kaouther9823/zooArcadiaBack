@@ -53,8 +53,7 @@ security:
         - { path: ^/api/races, methods: [GET], roles: [PUBLIC_ACCESS]}
         - { path: ^/api/contact, methods: [POST], roles: [PUBLIC_ACCESS]}
             # /api/services
-        - { path: ^/api/services, roles: ROLE_ADMIN }
-        - { path: ^/api/services, roles: ROLE_EMPLOYE }
+        - { path: ^/api/services, roles: [ROLE_EMPLOYE, ROLE_ADMIN] }
 
             # /api/habitats
         - { path: ^/api/habitats, roles: ROLE_ADMIN }
